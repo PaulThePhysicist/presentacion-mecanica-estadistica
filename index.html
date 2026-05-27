@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Estación de trabajo técnica sobre la adsorción de surfactantes en geles fractales, basada en principios de física estadística.">
+    <title>LAB // Adsorción de Surfactantes en Geles Fractales</title>
+    
+    <!-- Google Fonts: Lora (Editorial serif), Inter (Clean body), JetBrains Mono (Technical) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Grid Overlay Background -->
+    <div class="technical-grid-overlay"></div>
+
+    <!-- Navigation Header / Workstation Status Bar -->
+    <header class="app-header">
+        <div class="logo">
+            <span class="logo-accent">SYS //</span> SURFACTANT_ADSORPTION.d
+        </div>
+        <div class="header-status">
+            <span class="status-indicator"></span> STATUS: ACTIVE_SIMULATION
+        </div>
+        <div class="slide-counter" id="slide-indicator">01 / 09</div>
+    </header>
+
+    <!-- Main Presentation Deck Container -->
+    <main class="slide-deck" id="deck-container">
+        
+        <!-- Slide 1: Portada Hero (Editorial / Scientific Poster style) -->
+        <section class="slide active" id="slide-1" data-title="[01] PORTADA">
+            <div class="slide-content hero-slide">
+                <div class="technical-panel hero-panel">
+                    <span class="badge">[ LAB_STAT_PHYS // EJERCICIO_06 ]</span>
+                    <h1 class="hero-title">Adsorción de Surfactantes</h1>
+                    <p class="hero-subtitle">Estudio de transiciones dimensionales: de interfaces bidimensionales a la complejidad fractal en geles.</p>
+                    <div class="technical-divider"></div>
+                    <div class="hero-metadata-grid">
+                        <div class="meta-cell">
+                            <span class="meta-label">SUSTRATO:</span>
+                            <span class="meta-value">d-dimensional (1D, 2D, d_f)</span>
+                        </div>
+                        <div class="meta-cell">
+                            <span class="meta-label">SISTEMA:</span>
+                            <span class="meta-value">Gas ideal clásico diluido</span>
+                        </div>
+                        <div class="meta-cell">
+                            <span class="meta-label">AUTOR:</span>
+                            <span class="meta-value">Física Estadística</span>
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="nextSlide()">INICIAR EJECUCIÓN</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 2: Enunciado del Ejercicio -->
+        <section class="slide" id="slide-2" data-title="[02] ENUNCIADO">
+            <div class="slide-content grid-2">
+                <div class="text-column">
+                    <span class="badge">[ EJERCICIO_06 // ENUNCIADO ]</span>
+                    <h2>Adsorción de Surfactantes en Geles</h2>
+                    
+                    <div class="technical-panel info-box">
+                        <p class="highlight" style="font-size: 1.02rem; line-height: 1.5; margin: 0; padding-left: 12px;">
+                            Una solución diluida de surfactantes puede tratarse como un gas ideal tridimensional. Las moléculas de surfactante pueden reducir su energía al entrar en contacto con el aire, por lo que una fracción de ellas migra a la superficie (gas ideal 2D). Los surfactantes son igualmente adsorbidos por medios porosos como polímeros y geles que tienen afinidad por ellos.
+                        </p>
+                    </div>
+
+                    <div class="technical-panel">
+                        <div class="panel-header">DIAGRAMA DE FASES Y SUSTRATOS</div>
+                        <div style="display: flex; gap: 12px; margin-top: 4px; font-family: var(--font-tech); font-size: 0.75rem;">
+                            <div style="flex: 1; border: 1px solid var(--border-color); padding: 10px; border-radius: 2px; background: rgba(255,255,255,0.01);">
+                                <span class="orange-text">[ 3D ] SOLUCIÓN</span>
+                                <div style="color: var(--text-dim); margin-top: 4px; line-height: 1.3;">Gas ideal en volumen tridimensional ($d=3$, $\varepsilon_3=0$).</div>
+                            </div>
+                            <div style="flex: 1; border: 1px solid var(--border-color); padding: 10px; border-radius: 2px; background: rgba(255,255,255,0.01);">
+                                <span class="orange-text">[ 2D ] SUPERFICIE</span>
+                                <div style="color: var(--text-dim); margin-top: 4px; line-height: 1.3;">Capa superficial con ganancia energética $\varepsilon_0$ ($d=2$, $\varepsilon_2=\varepsilon_0$).</div>
+                            </div>
+                            <div style="flex: 1; border: 1px solid var(--border-color); padding: 10px; border-radius: 2px; background: rgba(255,255,255,0.01);">
+                                <span class="orange-text">[ d_f ] GEL FRACTAL</span>
+                                <div style="color: var(--text-dim); margin-top: 4px; line-height: 1.3;">Red de polímeros entrecruzados de dimensión fractal $d_f$.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="visual-column" style="display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%; justify-content: center;">
+                    <div class="technical-panel" style="width: 100%; padding: 14px 18px;">
+                        <span class="badge">[ PARTE_A ]</span>
+                        <p style="font-size: 0.85rem; line-height: 1.35; color: var(--text-light); margin: 0;">
+                            Considera un gas ideal de partículas clásicas de masa $m$ en $d$ dimensiones en un potencial atractivo $-\varepsilon_d$. Muestra que el potencial químico es:
+                        </p>
+                        <div class="equation-box-small" style="margin: 6px 0 0 0; font-size: 0.8rem; padding: 4px 8px;">
+                            $\mu_d = -\varepsilon_d + k_BT \ln(n_d \lambda_T^d), \quad \lambda_T = \frac{h}{\sqrt{2\pi m k_B T}}$
+                        </div>
+                    </div>
+                    
+                    <div class="technical-panel" style="width: 100%; padding: 14px 18px;">
+                        <span class="badge">[ PARTE_B ]</span>
+                        <p style="font-size: 0.85rem; line-height: 1.35; color: var(--text-light); margin: 0;">
+                            Si un surfactante reduce su energía en $\varepsilon_0$ al moverse a la superficie, calcula la concentración superficial de equilibrio $n_2$ como función de la concentración en solución $n = n_3$ a temperatura $T$.
+                        </p>
+                    </div>
+                    
+                    <div class="technical-panel" style="width: 100%; padding: 14px 18px;">
+                        <span class="badge">[ PARTE_C ]</span>
+                        <p style="font-size: 0.85rem; line-height: 1.35; color: var(--text-light); margin: 0;">
+                            ¿Puede testearse experimentalmente si un gel poroso es fractal de dimensión $d_f$ comparando la adsorción relativa en el gel ($n_{d_f}$) versus la de polímeros lineales individuales ($n_1$) en función de $T$?
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Introducción e Intuición Física -->
+        <section class="slide" id="slide-3" data-title="[03] CONCEPTO">
+            <div class="slide-content grid-2">
+                <div class="text-column">
+                    <span class="badge">[ CONFIG_SISTEMA ]</span>
+                    <h2>Naturaleza Dual de los Surfactantes</h2>
+                    <p class="highlight">Las moléculas de surfactante poseen una estructura anfifílica: una cabeza polar (hidrofílica) y una cola hidrocarbonada apolar (hidrofóbica).</p>
+                    
+                    <div class="technical-panel info-box">
+                        <h3>Mecanismo de Adsorción</h3>
+                        <p>Al migrar de la solución en volumen (3D) a la superficie (2D), las colas evitan el contacto con el agua, reduciendo la energía libre del sistema. Este proceso espontáneo de auto-ensamblaje modifica drásticamente las propiedades termodinámicas de la interfaz.</p>
+                    </div>
+                    
+                    <p>En medios porosos complejos, la adsorción se ve restringida por la topología interna del gel, obligando a tratar la fase adsorbida en un espacio geométrico de dimensiones no enteras ($d_f$).</p>
+                </div>
+                <div class="visual-column">
+                    <div class="technical-panel widget-card">
+                        <div class="panel-header-tabs">
+                            <span class="panel-header-title">VIEWPORT: SURFACTANT_SIM</span>
+                            <div class="viewer-tabs">
+                                <button class="viewer-tab-btn active" id="btn-mode-monolayer" onclick="setMoleculeMode('monolayer')">[ MONOCAPA ]</button>
+                                <button class="viewer-tab-btn" id="btn-mode-micelle" onclick="setMoleculeMode('micelle')">[ MICELA ]</button>
+                                <button class="viewer-tab-btn" id="btn-mode-anatomy" onclick="setMoleculeMode('anatomy')">[ ANATOMÍA ]</button>
+                            </div>
+                        </div>
+                        <div class="molecule-viewer-container">
+                            <canvas id="molecule-canvas"></canvas>
+                            
+                            <!-- Telemetry HUD -->
+                            <div class="viewer-hud" id="molecule-hud">
+                                <div class="hud-item" id="hud-gamma-container">
+                                    <span class="hud-label">TEN_SUPERFICIAL (γ):</span>
+                                    <span class="hud-value tech-mono" id="hud-gamma">72.8 mN/m</span>
+                                </div>
+                                <div class="hud-item" id="hud-pi-container">
+                                    <span class="hud-label">PRES_SUPERFICIAL (Π):</span>
+                                    <span class="hud-value tech-mono" id="hud-pi">0.0 mN/m</span>
+                                </div>
+                                <div class="hud-item" id="hud-theta-container">
+                                    <span class="hud-label">EMPAQUETAMIENTO (θ):</span>
+                                    <span class="hud-value tech-mono" id="hud-theta">0.00</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Interactive Tooltip for anatomy details -->
+                            <div class="molecule-tooltip" id="molecule-tooltip" style="display: none;">
+                                <div class="tooltip-title">REGEL_SECT</div>
+                                <div class="tooltip-body">Pasa el cursor sobre una parte para análisis.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Interactive Simulation Slider -->
+                        <div class="viewer-control-panel" id="molecule-control-panel">
+                            <label for="slider-molecule-param" id="label-molecule-param">Compresión de Monocapa: <span id="val-molecule-param" class="tech-mono">0%</span></label>
+                            <input type="range" id="slider-molecule-param" min="0" max="100" step="1" value="0">
+                        </div>
+
+                        <div class="controls-hint" id="molecule-hint">
+                            [ MUEVE EL CURSOR PARA CREAR ONDAS Y PERTURBAR LA INTERFAZ ]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Literal (a) — El Potencial Químico en d Dimensiones -->
+        <section class="slide" id="slide-4" data-title="[04] DERIVACIÓN">
+            <div class="slide-content grid-2">
+                <div class="text-column">
+                    <div class="text-column-inner">
+                        <span class="badge">[ DEDUCCIÓN // LITERAL_A ]</span>
+                        <h2>Deducción del Potencial Químico</h2>
+                        
+                        <div class="equation-box technical-panel" style="padding: 10px; min-height: 50px; margin: 4px 0;">
+                            <div id="equation-main"></div>
+                        </div>
+                        
+                        <!-- Dynamic narrative content container -->
+                        <div id="step-narrative" class="math-step-content" style="font-size: 0.88rem; line-height: 1.45; color: var(--text-dim);">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+
+                        <!-- Step-by-step navigation for mathematical derivation -->
+                        <div class="stepper-controls" style="margin-top: 8px;">
+                            <button class="btn btn-secondary btn-sm" id="prev-step-btn" onclick="prevDerivationStep()">[ ANTERIOR ]</button>
+                            <span id="step-indicator" class="tech-mono">PASO 1 / 5</span>
+                            <button class="btn btn-primary btn-sm" id="next-step-btn" onclick="nextDerivationStep()">[ SIGUIENTE ]</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="visual-column">
+                    <div class="technical-panel widget-card math-explanation-card" style="min-height: auto; width: 100%;">
+                        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span id="step-title">1. Hamiltoniano del Sistema</span>
+                            <button class="btn-panic" id="panic-btn-a" onclick="toggleBorrador('a')">[ 💀 ]</button>
+                        </div>
+                        <div class="math-step-content" id="step-content">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Literal (a) — Simulador de Espacio de Fases -->
+        <section class="slide" id="slide-5" data-title="[05] FASES_TÉRMICAS">
+            <div class="slide-content grid-2">
+                <div class="text-column">
+                    <span class="badge">[ PARÁMETRO_DE_DEGENERACIÓN ]</span>
+                    <h2>Longitud de Onda Térmica</h2>
+                    <p>La longitud térmica de De Broglie $\lambda_T$ marca la frontera espacial donde la mecánica cuántica se vuelve imperativa frente a la agitación térmica:</p>
+                    <div class="equation-box-small" id="eq-lambda-t"></div>
+                    
+                    <p>Si el volumen por partícula es del orden de la longitud térmica ($n_d \lambda_T^d \sim 1$), los paquetes de onda individuales se solapan, provocando la degeneración cuántica.</p>
+                    
+                    <div class="technical-panel status-indicator-box">
+                        <span class="tech-mono">RÉGIMEN:</span>
+                        <div id="quantum-regime-status" class="status-classic">CLÁSICO (DILUIDO)</div>
+                    </div>
+                </div>
+                <div class="visual-column">
+                    <div class="technical-panel widget-card">
+                        <div class="panel-header">CONTROL PANEL: THERMAL_DE_BROGLIE</div>
+                        
+                        <div class="control-group">
+                            <label for="slider-dim">Dimensión ($d$): <span id="val-dim" class="tech-mono">3</span></label>
+                            <input type="range" id="slider-dim" min="1" max="3" step="1" value="3">
+                        </div>
+
+                        <div class="control-group">
+                            <label for="slider-temp-phase">Temperatura ($T$): <span id="val-temp-phase" class="tech-mono">300</span> K</label>
+                            <input type="range" id="slider-temp-phase" min="10" max="600" step="10" value="300">
+                        </div>
+
+                        <div class="control-group">
+                            <label for="slider-mass">Masa de la molécula ($m$): <span id="val-mass" class="tech-mono">50</span> amu</label>
+                            <input type="range" id="slider-mass" min="10" max="300" step="10" value="50">
+                        </div>
+
+                        <div class="control-group">
+                            <label for="slider-dens">Densidad ($n_d$): <span id="val-dens" class="tech-mono">0.5</span> nm^-d</label>
+                            <input type="range" id="slider-dens" min="0.01" max="2.0" step="0.05" value="0.5">
+                        </div>
+
+                        <div class="results-grid">
+                            <div class="res-item">
+                                <span class="res-label">λ_T CALCULADO:</span>
+                                <span class="res-val tech-mono" id="res-lambda-t">0.00 nm</span>
+                            </div>
+                            <div class="res-item">
+                                <span class="res-label">n_d λ_T^d (ORDEN):</span>
+                                <span class="res-val tech-mono" id="res-parameter">0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="wave-visualizer">
+                            <canvas id="wave-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Literal (b) — Coexistencia de Fases -->
+        <section class="slide" id="slide-6" data-title="[06] COEXISTENCIA">
+            <div class="slide-content grid-2">
+                <div class="text-column">
+                    <div class="text-column-inner">
+                        <span class="badge">[ COEXISTENCIA // LITERAL_B ]</span>
+                        <h2>Coexistencia de Fases 3D ⇄ 2D</h2>
+                        
+                        <div class="equation-box technical-panel" style="padding: 10px; min-height: 50px; margin: 4px 0;">
+                            <div id="equation-main-b"></div>
+                        </div>
+                        
+                        <!-- Dynamic narrative content container for slide 6 -->
+                        <div id="step-narrative-b" class="math-step-content" style="font-size: 0.88rem; line-height: 1.45; color: var(--text-dim);">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+
+                        <!-- Step-by-step navigation for mathematical derivation -->
+                        <div class="stepper-controls" style="margin-top: 8px;">
+                            <button class="btn btn-secondary btn-sm" id="prev-step-btn-b" onclick="prevDerivationStepB()">[ ANTERIOR ]</button>
+                            <span id="step-indicator-b" class="tech-mono">PASO 1 / 4</span>
+                            <button class="btn btn-primary btn-sm" id="next-step-btn-b" onclick="nextDerivationStepB()">[ SIGUIENTE ]</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="visual-column">
+                    <div class="technical-panel widget-card math-explanation-card" style="min-height: auto; width: 100%;">
+                        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span id="step-title-b">1. Condición de Equilibrio</span>
+                            <button class="btn-panic" id="panic-btn-b" onclick="toggleBorrador('b')">[ 💀 ]</button>
+                        </div>
+                        <div class="math-step-content" id="step-content-b">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Literal (b) — Simulador de Adsorción 3D/2D -->
+        <section class="slide" id="slide-7" data-title="[07] SIM_ADSORCIÓN">
+            <div class="slide-content grid-2">
+                <div class="text-column">
+                    <span class="badge">[ DINÁMICA_DE_COEXISTENCIA ]</span>
+                    <h2>Simulación de Adsorción en Tiempo Real</h2>
+                    <p>Modifica los parámetros físicos del sistema para observar el comportamiento dinámico de los surfactantes entre el seno del líquido y la interfaz.</p>
+                    
+                    <div class="control-group">
+                        <label for="slider-temp-ad">Temperatura ($T$): <span id="val-temp-ad" class="tech-mono">300</span> K</label>
+                        <input type="range" id="slider-temp-ad" min="100" max="600" step="10" value="300">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="slider-energy-ad">Afinidad Superficial ($\varepsilon_0$): <span id="val-energy-ad" class="tech-mono">0.10</span> eV</label>
+                        <input type="range" id="slider-energy-ad" min="0.01" max="0.30" step="0.01" value="0.10">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="slider-conc-ad">Concentración 3D ($n$): <span id="val-conc-ad" class="tech-mono">0.05</span> nm^-3</label>
+                        <input type="range" id="slider-conc-ad" min="0.01" max="0.15" step="0.01" value="0.05">
+                    </div>
+
+                    <div class="statistics-box technical-panel">
+                        <div class="stat-row">
+                            <span>Densidad Superficial Real n_2:</span>
+                            <strong id="val-stat-n2" class="orange-text tech-mono">0.00 nm^-2</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Relación de Adsorción (n_2 / n):</span>
+                            <strong id="val-stat-ratio" class="tech-mono">0.00 nm</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="visual-column">
+                    <div class="technical-panel widget-card canvas-widget">
+                        <div class="panel-header">MONITOR: BULK_INTERFACE_KINETICS</div>
+                        <div class="simulation-view">
+                            <canvas id="adsorption-canvas"></canvas>
+                        </div>
+                        
+                        <div class="chart-view mt-4">
+                            <div class="panel-header">GRAPH: n_2 vs TEMPERATURE</div>
+                            <div class="svg-chart-container" id="adsorption-chart-container">
+                                <svg id="adsorption-svg-chart" viewBox="0 0 400 200"></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Literal (c) — La Hipótesis Fractal en Geles -->
+        <section class="slide" id="slide-8" data-title="[08] GELES_FRACTALES">
+            <div class="slide-content grid-2">
+                <div class="text-column">
+                    <div class="text-column-inner">
+                        <span class="badge">[ HIPÓTESIS FRACTAL // LITERAL_C ]</span>
+                        <h2>Adsorción en Geles Fractales</h2>
+                        
+                        <div class="equation-box technical-panel" style="padding: 10px; min-height: 50px; margin: 4px 0;">
+                            <div id="equation-main-c"></div>
+                        </div>
+                        
+                        <!-- Dynamic narrative content container for slide 8 -->
+                        <div id="step-narrative-c" class="math-step-content" style="font-size: 0.88rem; line-height: 1.45; color: var(--text-dim);">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+
+                        <!-- Step-by-step navigation for mathematical derivation -->
+                        <div class="stepper-controls" style="margin-top: 8px;">
+                            <button class="btn btn-secondary btn-sm" id="prev-step-btn-c" onclick="prevDerivationStepC()">[ ANTERIOR ]</button>
+                            <span id="step-indicator-c" class="tech-mono">PASO 1 / 4</span>
+                            <button class="btn btn-primary btn-sm" id="next-step-btn-c" onclick="nextDerivationStepC()">[ SIGUIENTE ]</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="visual-column" style="display: flex; flex-direction: column; gap: 12px; height: 100%; justify-content: space-between;">
+                    <div class="technical-panel widget-card math-explanation-card" style="min-height: auto; flex-grow: 1; width: 100%;">
+                        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span id="step-title-c">1. Hipótesis de Adsorción</span>
+                            <button class="btn-panic" id="panic-btn-c" onclick="toggleBorrador('c')">[ 💀 ]</button>
+                        </div>
+                        <div class="math-step-content" id="step-content-c">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <div class="technical-panel widget-card explanation-box-visual" style="padding: 10px 18px; flex-shrink: 0; width: 100%;">
+                        <div class="panel-header" style="margin-bottom: 8px;">GEOMETRÍA AUTO-SEMEJANTE DEL SUSTRATO</div>
+                        
+                        <div class="fractal-visualization" style="height: 110px; margin-top: 4px;">
+                            <div class="fractal-box technical-panel" id="fractal-box-1" style="padding: 6px 10px;">
+                                <span>Cadena Lineal (1D)</span>
+                                <div class="line-1d"></div>
+                            </div>
+                            <div class="fractal-box technical-panel" id="fractal-box-f" style="padding: 6px 10px;">
+                                <span>Malla Fractal (d_f ~ 1.58)</span>
+                                <canvas id="fractal-canvas-tree" style="height: 60px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Literal (c) — Laboratorio Virtual de Dimensión Fractal -->
+        <section class="slide" id="slide-9" data-title="[09] LABORATORIO">
+            <div class="slide-content grid-2">
+                <div class="text-column">
+                    <span class="badge">[ INSTRUMENTACIÓN_VIRTUAL ]</span>
+                    <h2>Caracterización Dimensional del Gel</h2>
+                    <p>Simula un experimento de laboratorio de adsorción para deducir la dimensión fractal experimental $d_f$ de una muestra desconocida.</p>
+                    
+                    <div class="control-group">
+                        <label for="select-gel">Selecciona la Muestra de Gel:</label>
+                        <select id="select-gel" class="select-input">
+                            <option value="gel-a">Muestra Gel Alfa (Red de Sierpinski)</option>
+                            <option value="gel-b">Muestra Gel Beta (Red ramificada)</option>
+                            <option value="gel-c">Muestra Gel Gamma (Red de alta densidad)</option>
+                        </select>
+                    </div>
+
+                    <div class="action-buttons-group">
+                        <button class="btn btn-primary" id="btn-measure" onclick="runExperiment()">[ ADQUIRIR PUNTOS ]</button>
+                        <button class="btn btn-secondary" id="btn-linearize" onclick="toggleLinearization()" disabled>[ LINEALIZAR LOG ]</button>
+                        <button class="btn btn-success" id="btn-fit" onclick="fitExperimentalData()" disabled>[ AJUSTAR MÍN_CUADRADOS ]</button>
+                    </div>
+
+                    <div class="technical-panel results-analysis-box">
+                        <div class="panel-header">REGRESSION_SUMMARY</div>
+                        <div class="stat-row">
+                            <span>Pendiente de la recta (m):</span>
+                            <span id="fit-slope" class="orange-text tech-mono">--</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Dimensión Fractal Real d_f:</span>
+                            <strong id="fit-df" class="orange-text tech-mono">--</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Ajuste Termodinámico:</span>
+                            <span id="fit-formula" class="tech-mono text-sm">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="visual-column">
+                    <div class="technical-panel widget-card canvas-widget">
+                        <div class="panel-header">PLOTTER: ADSORPTION_RATIO_VS_T</div>
+                        <div class="svg-chart-container" id="lab-chart-container">
+                            <svg id="lab-svg-chart" viewBox="0 0 500 350">
+                                <g id="lab-grid-lines"></g>
+                                <g id="lab-axes"></g>
+                                <path id="lab-fit-line" d="" fill="none" stroke="#ff5500" stroke-width="2" stroke-dasharray="4,4"></path>
+                                <g id="lab-data-points"></g>
+                                <text id="lab-x-label" x="250" y="340" text-anchor="middle" fill="#8e939d" font-size="10" font-family="'JetBrains Mono', monospace">Temperatura T (K)</text>
+                                <text id="lab-y-label" x="15" y="175" text-anchor="middle" fill="#8e939d" font-size="10" font-family="'JetBrains Mono', monospace" transform="rotate(-90 15 175)">Adsorción Relativa (n_df / n_1)</text>
+                            </svg>
+                        </div>
+                        <div class="controls-hint" id="lab-chart-hint">
+                            [ ADQUIERE DATOS DE LA MUESTRA PARA PROCEDER A SU LINEALIZACIÓN Y AJUSTE ]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Conclusiones e Impacto -->
+        <section class="slide" id="slide-10" data-title="[10] SÍNTESIS">
+            <div class="slide-content grid-2">
+                <div class="text-column">
+                    <span class="badge">[ INFORME_SÍNTESIS ]</span>
+                    <h2>Conclusiones del Análisis</h2>
+                    <p class="highlight">La física estadística provee un puente directo entre la microestructura geométrica de geles (escala nanométrica) y las observaciones experimentales macroscópicas.</p>
+                    
+                    <div class="technical-panel conclusion-item">
+                        <h3>Sensibilidad Dimensional de la Entropía</h3>
+                        <p>El término $n_d \lambda_T^d$ demuestra cómo la escala cuántica $\lambda_T(T)$ incide de forma diferente según la dimensionalidad $d$, condicionando la isoterma de adsorción.</p>
+                    </div>
+                    
+                    <div class="technical-panel conclusion-item mt-3">
+                        <h3>La Firma Geométrica Termodinámica</h3>
+                        <p>La adsorción relativa $n_{d_f}/n_1 \propto T^{(d_f-1)/2}$ permite aislar la dimensión fractal $d_f$ en la pendiente de la curva de logaritmos. Esto convierte a la temperatura en una sonda geométrica directa.</p>
+                    </div>
+                </div>
+                <div class="visual-column">
+                    <div class="technical-panel summary-box-accent">
+                        <div class="panel-header">SYS_EXECUTION_COMPLETED</div>
+                        <p class="text-sm">El análisis termodinámico confirma la hipótesis fractal planteada en el ejercicio 6, proporcionando un método de caracterización no invasivo.</p>
+                        
+                        <ul class="summary-list tech-mono">
+                            <li><span class="num">[A]</span> Potencial químico $\mu_d$ demostrado.</li>
+                            <li><span class="num">[B]</span> Ley de adsorción 3D/2D verificada.</li>
+                            <li><span class="num">[C]</span> Determinación lineal de $d_f$ resuelta.</li>
+                        </ul>
+                        <div class="end-button-container mt-6">
+                            <button class="btn btn-primary btn-lg w-full" onclick="goToSlide(0)">[ RESETEARE_SISTEMA ]</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Workstation Control Panel Footer -->
+    <footer class="app-footer">
+        <div class="kbd-shortcuts tech-mono">
+            SYS_NAV: [←] PREV // [→] NEXT // [SPACE] FORWARD
+        </div>
+        <div class="footer-nav-buttons">
+            <button class="btn-icon" onclick="prevSlide()" aria-label="Slide anterior">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button class="btn-icon" onclick="nextSlide()" aria-label="Siguiente slide">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </div>
+    </footer>
+
+    <!-- Technical Modal for 'El Borrador' (Justification/Panic Mode) -->
+    <div class="technical-modal" id="borrador-modal">
+        <div class="modal-overlay" onclick="closeBorradorModal()"></div>
+        <div class="technical-panel modal-content">
+            <div class="modal-header">
+                <span class="orange-text">// BORRADOR_DESENCRIPTADO.log</span>
+                <button class="btn-close-modal" onclick="closeBorradorModal()">[ X ]</button>
+            </div>
+            <div class="modal-body" id="borrador-modal-body">
+                <!-- Dynamically populated with scratchpad content -->
+            </div>
+            <div class="modal-footer tech-mono">
+                SYS_VERIFICATION_SECURE_CHANNEL // STATUS: CALC_VERIFIED
+            </div>
+        </div>
+    </div>
+
+    <!-- KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
