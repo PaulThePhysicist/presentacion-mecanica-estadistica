@@ -227,67 +227,8 @@
             </div>
         </section>
 
-        <!-- Slide 5: Literal (a) — Simulador de Espacio de Fases -->
-        <section class="slide" id="slide-5" data-title="[05] FASES_TÉRMICAS">
-            <div class="slide-content grid-2">
-                <div class="text-column">
-                    <span class="badge">[ PARÁMETRO_DE_DEGENERACIÓN ]</span>
-                    <h2>Longitud de Onda Térmica</h2>
-                    <p>La longitud térmica de De Broglie $\lambda_T$ marca la frontera espacial donde la mecánica cuántica se vuelve imperativa frente a la agitación térmica:</p>
-                    <div class="equation-box-small" id="eq-lambda-t"></div>
-                    
-                    <p>Si el volumen por partícula es del orden de la longitud térmica ($n_d \lambda_T^d \sim 1$), los paquetes de onda individuales se solapan, provocando la degeneración cuántica.</p>
-                    
-                    <div class="technical-panel status-indicator-box">
-                        <span class="tech-mono">RÉGIMEN:</span>
-                        <div id="quantum-regime-status" class="status-classic">CLÁSICO (DILUIDO)</div>
-                    </div>
-                </div>
-                <div class="visual-column">
-                    <div class="technical-panel widget-card">
-                        <div class="panel-header">CONTROL PANEL: THERMAL_DE_BROGLIE</div>
-                        
-                        <div class="control-group">
-                            <label for="slider-dim">Dimensión ($d$): <span id="val-dim" class="tech-mono">3</span></label>
-                            <input type="range" id="slider-dim" min="1" max="3" step="1" value="3">
-                        </div>
-
-                        <div class="control-group">
-                            <label for="slider-temp-phase">Temperatura ($T$): <span id="val-temp-phase" class="tech-mono">300</span> K</label>
-                            <input type="range" id="slider-temp-phase" min="10" max="600" step="10" value="300">
-                        </div>
-
-                        <div class="control-group">
-                            <label for="slider-mass">Masa de la molécula ($m$): <span id="val-mass" class="tech-mono">50</span> amu</label>
-                            <input type="range" id="slider-mass" min="10" max="300" step="10" value="50">
-                        </div>
-
-                        <div class="control-group">
-                            <label for="slider-dens">Densidad ($n_d$): <span id="val-dens" class="tech-mono">0.5</span> nm^-d</label>
-                            <input type="range" id="slider-dens" min="0.01" max="2.0" step="0.05" value="0.5">
-                        </div>
-
-                        <div class="results-grid">
-                            <div class="res-item">
-                                <span class="res-label">λ_T CALCULADO:</span>
-                                <span class="res-val tech-mono" id="res-lambda-t">0.00 nm</span>
-                            </div>
-                            <div class="res-item">
-                                <span class="res-label">n_d λ_T^d (ORDEN):</span>
-                                <span class="res-val tech-mono" id="res-parameter">0.00</span>
-                            </div>
-                        </div>
-
-                        <div class="wave-visualizer">
-                            <canvas id="wave-canvas"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Slide 6: Literal (b) — Coexistencia de Fases -->
-        <section class="slide" id="slide-6" data-title="[06] COEXISTENCIA">
+        <!-- Slide 5: Literal (b) — Coexistencia de Fases -->
+        <section class="slide" id="slide-5" data-title="[05] COEXISTENCIA">
             <div class="slide-content grid-2">
                 <div class="text-column">
                     <div class="text-column-inner">
@@ -325,8 +266,8 @@
             </div>
         </section>
 
-        <!-- Slide 7: Literal (b) — Simulador de Adsorción 3D/2D -->
-        <section class="slide" id="slide-7" data-title="[07] SIM_ADSORCIÓN">
+        <!-- Slide 6: Literal (b) — Simulador de Adsorción 3D/2D -->
+        <section class="slide" id="slide-6" data-title="[06] SIM_ADSORCIÓN">
             <div class="slide-content grid-2">
                 <div class="text-column">
                     <span class="badge">[ DINÁMICA_DE_COEXISTENCIA ]</span>
@@ -377,8 +318,8 @@
             </div>
         </section>
 
-        <!-- Slide 8: Literal (c) — La Hipótesis Fractal en Geles -->
-        <section class="slide" id="slide-8" data-title="[08] GELES_FRACTALES">
+        <!-- Slide 7: Literal (c) — La Hipótesis Fractal en Geles -->
+        <section class="slide" id="slide-7" data-title="[07] GELES_FRACTALES">
             <div class="slide-content grid-2">
                 <div class="text-column">
                     <div class="text-column-inner">
@@ -402,97 +343,79 @@
                         </div>
                     </div>
                 </div>
-                <div class="visual-column" style="display: flex; flex-direction: column; gap: 12px; height: 100%; justify-content: space-between;">
-                    <div class="technical-panel widget-card math-explanation-card" style="min-height: auto; flex-grow: 1; width: 100%;">
+                <div class="visual-column">
+                    <div class="technical-panel widget-card math-explanation-card" style="min-height: auto; width: 100%;">
                         <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                             <span id="step-title-c">1. Hipótesis de Adsorción</span>
                             <button class="btn-panic" id="panic-btn-c" onclick="toggleBorrador('c')">[ 💀 ]</button>
                         </div>
                         <div class="math-step-content" id="step-content-c">
-                            <!-- Dynamically populated by JS -->
-                        </div>
-                    </div>
-                    
-                    <div class="technical-panel widget-card explanation-box-visual" style="padding: 10px 18px; flex-shrink: 0; width: 100%;">
-                        <div class="panel-header" style="margin-bottom: 8px;">GEOMETRÍA AUTO-SEMEJANTE DEL SUSTRATO</div>
-                        
-                        <div class="fractal-visualization" style="height: 110px; margin-top: 4px;">
-                            <div class="fractal-box technical-panel" id="fractal-box-1" style="padding: 6px 10px;">
-                                <span>Cadena Lineal (1D)</span>
-                                <div class="line-1d"></div>
-                            </div>
-                            <div class="fractal-box technical-panel" id="fractal-box-f" style="padding: 6px 10px;">
-                                <span>Malla Fractal (d_f ~ 1.58)</span>
-                                <canvas id="fractal-canvas-tree" style="height: 60px;"></canvas>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Slide 9: Literal (c) — Laboratorio Virtual de Dimensión Fractal -->
-        <section class="slide" id="slide-9" data-title="[09] LABORATORIO">
+        <!-- Slide 8: Literal (c) — Simulador Interactivo de Adsorción Fractal -->
+        <section class="slide" id="slide-8" data-title="[08] SIM_FRACTAL">
             <div class="slide-content grid-2">
                 <div class="text-column">
-                    <span class="badge">[ INSTRUMENTACIÓN_VIRTUAL ]</span>
-                    <h2>Caracterización Dimensional del Gel</h2>
-                    <p>Simula un experimento de laboratorio de adsorción para deducir la dimensión fractal experimental $d_f$ de una muestra desconocida.</p>
+                    <span class="badge">[ ADSORCIÓN // REDES_FRACTALES ]</span>
+                    <h2>Laboratorio de Adsorción Fractal</h2>
+                    <p>Interactúa con la estructura del gel para observar cómo su dimensión fractal y temperatura influyen en la capacidad de captura de surfactantes.</p>
                     
                     <div class="control-group">
-                        <label for="select-gel">Selecciona la Muestra de Gel:</label>
-                        <select id="select-gel" class="select-input">
-                            <option value="gel-a">Muestra Gel Alfa (Red de Sierpinski)</option>
-                            <option value="gel-b">Muestra Gel Beta (Red ramificada)</option>
-                            <option value="gel-c">Muestra Gel Gamma (Red de alta densidad)</option>
-                        </select>
+                        <label for="slider-fractal-depth">Profundidad Fractal ($k$): <span id="val-fractal-depth" class="tech-mono">3</span></label>
+                        <input type="range" id="slider-fractal-depth" min="1" max="5" step="1" value="3">
                     </div>
 
-                    <div class="action-buttons-group">
-                        <button class="btn btn-primary" id="btn-measure" onclick="runExperiment()">[ ADQUIRIR PUNTOS ]</button>
-                        <button class="btn btn-secondary" id="btn-linearize" onclick="toggleLinearization()" disabled>[ LINEALIZAR LOG ]</button>
-                        <button class="btn btn-success" id="btn-fit" onclick="fitExperimentalData()" disabled>[ AJUSTAR MÍN_CUADRADOS ]</button>
+                    <div class="control-group">
+                        <label for="slider-fractal-ratio">Factor de Escala ($r$): <span id="val-fractal-ratio" class="tech-mono">0.65</span></label>
+                        <input type="range" id="slider-fractal-ratio" min="0.50" max="0.75" step="0.01" value="0.65">
                     </div>
 
-                    <div class="technical-panel results-analysis-box">
-                        <div class="panel-header">REGRESSION_SUMMARY</div>
+                    <div class="control-group">
+                        <label for="slider-fractal-branches">Número de Ramas ($N$): <span id="val-fractal-branches" class="tech-mono">2</span></label>
+                        <input type="range" id="slider-fractal-branches" min="2" max="3" step="1" value="2">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="slider-fractal-temp">Temperatura ($T$): <span id="val-fractal-temp" class="tech-mono">300</span> K</label>
+                        <input type="range" id="slider-fractal-temp" min="100" max="600" step="10" value="300">
+                    </div>
+
+                    <div class="statistics-box technical-panel">
+                        <div class="panel-header">METRIC PANEL: [ EQUILIBRIO DINÁMICO ]</div>
                         <div class="stat-row">
-                            <span>Pendiente de la recta (m):</span>
-                            <span id="fit-slope" class="orange-text tech-mono">--</span>
+                            <span>Dimensión Fractal ($d_f$):</span>
+                            <strong id="val-fractal-df" class="orange-text tech-mono">1.61</strong>
                         </div>
                         <div class="stat-row">
-                            <span>Dimensión Fractal Real d_f:</span>
-                            <strong id="fit-df" class="orange-text tech-mono">--</strong>
+                            <span>Área Superficial (Longitud L):</span>
+                            <strong id="val-fractal-area" class="tech-mono">0.0 nm</strong>
                         </div>
                         <div class="stat-row">
-                            <span>Ajuste Termodinámico:</span>
-                            <span id="fit-formula" class="tech-mono text-sm">--</span>
+                            <span>Partículas Adsorbidas / Totales:</span>
+                            <strong id="val-fractal-adsorbed" class="tech-mono">0 / 40</strong>
                         </div>
                     </div>
                 </div>
                 <div class="visual-column">
                     <div class="technical-panel widget-card canvas-widget">
-                        <div class="panel-header">PLOTTER: ADSORPTION_RATIO_VS_T</div>
-                        <div class="svg-chart-container" id="lab-chart-container">
-                            <svg id="lab-svg-chart" viewBox="0 0 500 350">
-                                <g id="lab-grid-lines"></g>
-                                <g id="lab-axes"></g>
-                                <path id="lab-fit-line" d="" fill="none" stroke="#ff5500" stroke-width="2" stroke-dasharray="4,4"></path>
-                                <g id="lab-data-points"></g>
-                                <text id="lab-x-label" x="250" y="340" text-anchor="middle" fill="#8e939d" font-size="10" font-family="'JetBrains Mono', monospace">Temperatura T (K)</text>
-                                <text id="lab-y-label" x="15" y="175" text-anchor="middle" fill="#8e939d" font-size="10" font-family="'JetBrains Mono', monospace" transform="rotate(-90 15 175)">Adsorción Relativa (n_df / n_1)</text>
-                            </svg>
+                        <div class="panel-header">MONITOR: FRACTAL_ADSORPTION_DYNAMICS</div>
+                        <div class="simulation-view" style="flex-grow: 1; height: auto; min-height: 250px;">
+                            <canvas id="fractal-sim-canvas" style="width:100%; height:100%; display:block;"></canvas>
                         </div>
-                        <div class="controls-hint" id="lab-chart-hint">
-                            [ ADQUIERE DATOS DE LA MUESTRA PARA PROCEDER A SU LINEALIZACIÓN Y AJUSTE ]
+                        <div class="controls-hint">
+                            [ MÓDULO ACTIVO: LA TEMPERATURA GENERA AGITACIÓN Y DESORCIÓN ]
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Slide 10: Conclusiones e Impacto -->
-        <section class="slide" id="slide-10" data-title="[10] SÍNTESIS">
+        <!-- Slide 9: Conclusiones e Impacto -->
+        <section class="slide" id="slide-9" data-title="[09] SÍNTESIS">
             <div class="slide-content grid-2">
                 <div class="text-column">
                     <span class="badge">[ INFORME_SÍNTESIS ]</span>

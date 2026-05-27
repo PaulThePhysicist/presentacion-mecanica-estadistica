@@ -1523,12 +1523,12 @@ function prevDerivationStepC() {
 // Slide 4: Phase Space Simulator (Orange layout)
 // ----------------------------------------------------
 const waveCanvas = document.getElementById('wave-canvas');
-const waveCtx = waveCanvas.getContext('2d');
+const waveCtx = waveCanvas ? waveCanvas.getContext('2d') : null;
 
 let waveAnimId = null;
 
 function runWaveAnimationLoop() {
-    if (currentSlideIndex === 4) {
+    if (waveCanvas && currentSlideIndex === 4) {
         updatePhaseSpaceSim();
         waveAnimId = requestAnimationFrame(runWaveAnimationLoop);
     } else {
@@ -1537,6 +1537,7 @@ function runWaveAnimationLoop() {
 }
 
 function updatePhaseSpaceSim() {
+    if (!waveCanvas) return;
     const d = parseInt(document.getElementById('slider-dim').value);
     const T = parseFloat(document.getElementById('slider-temp-phase').value);
     const m = parseFloat(document.getElementById('slider-mass').value);
@@ -1933,7 +1934,7 @@ function drawAdsorptionCurve(n, E0, currentT, m_mol) {
 }
 
 function runAdsorpAnimationLoop() {
-    if (currentSlideIndex === 6) {
+    if (currentSlideIndex === 5) {
         // Dynamic resize check
         if (adsorpCanvas.width !== adsorpCanvas.clientWidth || adsorpCanvas.height !== adsorpCanvas.clientHeight) {
             adsorpCanvas.width = adsorpCanvas.clientWidth;
@@ -1956,15 +1957,17 @@ function runAdsorpAnimationLoop() {
 // Slide 7: Fractal Canvas Tree Drawing (Orange precision)
 // ----------------------------------------------------
 const fractalCanvas = document.getElementById('fractal-canvas-tree');
-const fractalCtx = fractalCanvas.getContext('2d');
+const fractalCtx = fractalCanvas ? fractalCanvas.getContext('2d') : null;
 
 function initFractalDrawing() {
+    if (!fractalCanvas) return;
     const rect = fractalCanvas.getBoundingClientRect();
     fractalCanvas.width = rect.width;
     fractalCanvas.height = rect.height;
 }
 
 function drawFractalTree(x, y, len, angle, branchWidth, depth) {
+    if (!fractalCtx) return;
     fractalCtx.beginPath();
     fractalCtx.moveTo(x, y);
     const x2 = x + Math.cos(angle) * len;
@@ -1987,7 +1990,8 @@ function drawFractalTree(x, y, len, angle, branchWidth, depth) {
 }
 
 function animateFractalTree() {
-    if (currentSlideIndex !== 7) return;
+    if (currentSlideIndex !== 6) return;
+    if (!fractalCanvas || !fractalCtx) return;
     
     // Dynamic resize check
     if (fractalCanvas.width !== fractalCanvas.clientWidth || fractalCanvas.height !== fractalCanvas.clientHeight) {
@@ -2013,285 +2017,323 @@ function animateFractalTree() {
 }
 
 // ----------------------------------------------------
-// Slide 8: Virtual Lab for measuring d_f (Square plots)
+// Slide 8: Interactive Fractal Adsorption Simulator
 // ----------------------------------------------------
-let gelDatabase = {
-    'gel-a': { name: 'Gel Alfa', df: 1.58, color: '#ff5500' }, // Safety Orange
-    'gel-b': { name: 'Gel Beta', df: 1.32, color: '#ffaa00' }, // Safety Yellow
-    'gel-c': { name: 'Gel Gamma', df: 1.81, color: '#ff2200' } // Red Orange
-};
+let fractalSimCanvas = null;
+let fractalSimCtx = null;
+let fractalSimSegments = [];
+let fractalSimParticles = [];
+let fractalSimAnimId = null;
+const FRACTAL_SIM_PARTICLE_COUNT = 50;
 
-let experimentalData = [];
-let isLinearized = false;
-let dataFit = null;
-
-const xMinNorm = 150, xMaxNorm = 450;
-const xMinLin = Math.log(150), xMaxLin = Math.log(450);
-let yMinLin = -2, yMaxLin = 2;
-
-function runExperiment() {
-    const gelKey = document.getElementById('select-gel').value;
-    const gel = gelDatabase[gelKey];
+function initFractalSim() {
+    fractalSimCanvas = document.getElementById('fractal-sim-canvas');
+    if (!fractalSimCanvas) return;
+    fractalSimCtx = fractalSimCanvas.getContext('2d');
     
-    experimentalData = [];
-    isLinearized = false;
-    dataFit = null;
-
-    const temps = [160, 195, 230, 265, 300, 335, 370, 405, 440];
-    const exponent = (gel.df - 1) / 2;
-    const scale = 2.0 / Math.pow(300, exponent);
-
-    temps.forEach(T => {
-        const exactRatio = scale * Math.pow(T, exponent);
-        const noise = (Math.random() - 0.5) * 0.08 * exactRatio;
-        const measuredRatio = exactRatio + noise;
-
-        experimentalData.push({
-            T: T,
-            ratio: measuredRatio,
-            currX: 0,
-            currY: 0
+    resizeFractalSimCanvas();
+    
+    // Create particles
+    fractalSimParticles = [];
+    for (let i = 0; i < FRACTAL_SIM_PARTICLE_COUNT; i++) {
+        fractalSimParticles.push({
+            x: Math.random() * fractalSimCanvas.width,
+            y: Math.random() * (fractalSimCanvas.height - 40) + 20,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+            isAdsorbed: false,
+            adsorbedSeg: null,
+            snapX: 0,
+            snapY: 0
         });
-    });
-
-    document.getElementById('btn-linearize').disabled = false;
-    document.getElementById('btn-linearize').textContent = "[ LINEALIZAR LOG ]";
-    document.getElementById('btn-fit').disabled = true;
-    
-    document.getElementById('fit-slope').textContent = "--";
-    document.getElementById('fit-df').textContent = "--";
-    document.getElementById('fit-formula').textContent = "--";
-
-    animatePointsTo('normal');
-    document.getElementById('lab-chart-hint').textContent = "[ PUNTOS ADQUIRIDOS CON ÉXITO. SELECCIONE LINEALIZACIÓN ]";
-}
-
-function toggleLinearization() {
-    isLinearized = !isLinearized;
-    const btn = document.getElementById('btn-linearize');
-    
-    if (isLinearized) {
-        btn.textContent = "[ ESCALA LINEAL ]";
-        document.getElementById('btn-fit').disabled = false;
-        animatePointsTo('linearized');
-        document.getElementById('lab-chart-hint').textContent = "[ ESCALA LOGARÍTMICA ACTIVA. PROCEDA A EFECTUAR EL AJUSTE ]";
-    } else {
-        btn.textContent = "[ LINEALIZAR LOG ]";
-        document.getElementById('btn-fit').disabled = true;
-        animatePointsTo('normal');
-        document.getElementById('lab-chart-hint').textContent = "[ RETORNADO A ESCALA LINEAL ]";
     }
-    dataFit = null;
-    drawLabChart();
+    
+    updateFractalSimParams();
 }
 
-function animatePointsTo(mode) {
-    const width = 500;
-    const height = 350;
-    const padLeft = 60;
-    const padBottom = 60;
-    const padRight = 30;
-    const padTop = 30;
-    const plotW = width - padLeft - padRight;
-    const plotH = height - padTop - padBottom;
+function resizeFractalSimCanvas() {
+    if (!fractalSimCanvas) return;
+    const rect = fractalSimCanvas.getBoundingClientRect();
+    fractalSimCanvas.width = rect.width;
+    fractalSimCanvas.height = rect.height;
+}
 
-    const maxRatio = Math.max(...experimentalData.map(d => d.ratio));
-    const yMaxNormal = Math.ceil(maxRatio * 1.15 * 10) / 10;
-
-    const logRatios = experimentalData.map(d => Math.log(d.ratio));
-    const minLogR = Math.min(...logRatios);
-    const maxLogR = Math.log(yMaxNormal);
+function updateFractalSimParams() {
+    if (!fractalSimCanvas) return;
     
-    yMinLin = Math.floor(minLogR - 0.2);
-    yMaxLin = Math.ceil(maxLogR + 0.2);
-
-    experimentalData.forEach(d => {
-        let destX, destY;
-        if (mode === 'normal') {
-            destX = padLeft + ((d.T - xMinNorm) / (xMaxNorm - xMinNorm)) * plotW;
-            destY = height - padBottom - (d.ratio / yMaxNormal) * plotH;
-        } else {
-            const lnT = Math.log(d.T);
-            const lnR = Math.log(d.ratio);
-            destX = padLeft + ((lnT - xMinLin) / (xMaxLin - xMinLin)) * plotW;
-            destY = height - padBottom - ((lnR - yMinLin) / (yMaxLin - yMinLin)) * plotH;
-        }
-
-        d.targetX = destX;
-        d.targetY = destY;
-        if (d.currX === 0 && d.currY === 0) {
-            d.currX = destX;
-            d.currY = destY;
+    const depth = parseInt(document.getElementById('slider-fractal-depth').value);
+    const r = parseFloat(document.getElementById('slider-fractal-ratio').value);
+    const N = parseInt(document.getElementById('slider-fractal-branches').value);
+    const T = parseFloat(document.getElementById('slider-fractal-temp').value);
+    
+    // Update labels
+    document.getElementById('val-fractal-depth').textContent = depth;
+    document.getElementById('val-fractal-ratio').textContent = r.toFixed(2);
+    document.getElementById('val-fractal-branches').textContent = N;
+    document.getElementById('val-fractal-temp').textContent = T;
+    
+    // Calculate fractal dimension df = ln(N) / ln(1/r)
+    const df = Math.log(N) / Math.log(1 / r);
+    document.getElementById('val-fractal-df').textContent = df.toFixed(2);
+    
+    // Generate segments
+    fractalSimSegments = [];
+    const startX = fractalSimCanvas.width / 2;
+    const startY = fractalSimCanvas.height - 20;
+    
+    // We want the tree to fit within the canvas height
+    const totalTarget = fractalSimCanvas.height * 0.65;
+    const initialLen = totalTarget * (1 - r);
+    
+    generateSimFractalSegments(startX, startY, initialLen, -Math.PI / 2, 4.0, 1, N, r, depth);
+    
+    // Calculate total length (surface area)
+    let totalLength = 0;
+    fractalSimSegments.forEach(seg => {
+        const dx = seg.x2 - seg.x1;
+        const dy = seg.y2 - seg.y1;
+        totalLength += Math.sqrt(dx * dx + dy * dy);
+    });
+    
+    // Scale length to physical units (nm), let's say 1 pixel = 0.05 nm
+    const physicalArea = totalLength * 0.05;
+    document.getElementById('val-fractal-area').textContent = `${physicalArea.toFixed(1)} nm`;
+    
+    // Re-check existing adsorbed particles to see if their segments still exist.
+    fractalSimParticles.forEach(p => {
+        if (p.isAdsorbed) {
+            p.isAdsorbed = false;
+            p.adsorbedSeg = null;
         }
     });
+}
 
-    let ticks = 0;
-    function animTick() {
-        let finished = true;
-        experimentalData.forEach(d => {
-            const dx = d.targetX - d.currX;
-            const dy = d.targetY - d.currY;
-            if (Math.abs(dx) > 0.2 || Math.abs(dy) > 0.2) {
-                d.currX += dx * 0.18;
-                d.currY += dy * 0.18;
-                finished = false;
+function generateSimFractalSegments(x, y, len, angle, branchWidth, depth, N, r, maxDepth) {
+    if (depth > maxDepth) return;
+    const x2 = x + Math.cos(angle) * len;
+    const y2 = y + Math.sin(angle) * len;
+    
+    fractalSimSegments.push({
+        id: fractalSimSegments.length,
+        x1: x,
+        y1: y,
+        x2: x2,
+        y2: y2,
+        width: branchWidth,
+        depth: depth
+    });
+    
+    if (N === 2) {
+        generateSimFractalSegments(x2, y2, len * r, angle - 0.42, branchWidth * 0.75, depth + 1, N, r, maxDepth);
+        generateSimFractalSegments(x2, y2, len * r, angle + 0.42, branchWidth * 0.75, depth + 1, N, r, maxDepth);
+    } else {
+        generateSimFractalSegments(x2, y2, len * r, angle - 0.48, branchWidth * 0.75, depth + 1, N, r, maxDepth);
+        generateSimFractalSegments(x2, y2, len * r, angle, branchWidth * 0.75, depth + 1, N, r, maxDepth);
+        generateSimFractalSegments(x2, y2, len * r, angle + 0.48, branchWidth * 0.75, depth + 1, N, r, maxDepth);
+    }
+}
+
+function runFractalSimLoop() {
+    if (currentSlideIndex === 7) {
+        updateFractalSimulation();
+    }
+    requestAnimationFrame(runFractalSimLoop);
+}
+
+function updateFractalSimulation() {
+    if (!fractalSimCanvas || !fractalSimCtx) return;
+    
+    // Clear canvas
+    fractalSimCtx.clearRect(0, 0, fractalSimCanvas.width, fractalSimCanvas.height);
+    
+    // Draw background tech grid
+    fractalSimCtx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
+    fractalSimCtx.lineWidth = 1;
+    for (let x = 20; x < fractalSimCanvas.width; x += 20) {
+        fractalSimCtx.beginPath();
+        fractalSimCtx.moveTo(x, 0);
+        fractalSimCtx.lineTo(x, fractalSimCanvas.height);
+        fractalSimCtx.stroke();
+    }
+    for (let y = 20; y < fractalSimCanvas.height; y += 20) {
+        fractalSimCtx.beginPath();
+        fractalSimCtx.moveTo(0, y);
+        fractalSimCtx.lineTo(fractalSimCanvas.width, y);
+        fractalSimCtx.stroke();
+    }
+    
+    const T = parseFloat(document.getElementById('slider-fractal-temp').value);
+    
+    // Render fractal segments
+    const segmentAdsorptionCount = {};
+    fractalSimSegments.forEach(seg => {
+        segmentAdsorptionCount[seg.id] = 0;
+    });
+    
+    fractalSimParticles.forEach(p => {
+        if (p.isAdsorbed && p.adsorbedSeg) {
+            segmentAdsorptionCount[p.adsorbedSeg.id] = (segmentAdsorptionCount[p.adsorbedSeg.id] || 0) + 1;
+        }
+    });
+    
+    fractalSimSegments.forEach(seg => {
+        fractalSimCtx.beginPath();
+        fractalSimCtx.moveTo(seg.x1, seg.y1);
+        fractalSimCtx.lineTo(seg.x2, seg.y2);
+        
+        const count = segmentAdsorptionCount[seg.id] || 0;
+        if (count > 0) {
+            // Glowing orange segment
+            const alpha = 0.2 + 0.15 * Math.min(count, 4);
+            fractalSimCtx.strokeStyle = `rgba(255, 85, 0, ${alpha})`;
+            fractalSimCtx.lineWidth = seg.width + 1.5;
+            fractalSimCtx.shadowColor = '#ff5500';
+            fractalSimCtx.shadowBlur = 4 + 2 * Math.min(count, 4);
+            fractalSimCtx.stroke();
+            fractalSimCtx.shadowBlur = 0; // reset
+        } else {
+            // Clean slate-grey segment
+            fractalSimCtx.strokeStyle = 'rgba(78, 83, 94, 0.4)';
+            fractalSimCtx.lineWidth = seg.width;
+            fractalSimCtx.stroke();
+        }
+    });
+    
+    // Physics values
+    const velocityScale = 0.08 * Math.sqrt(T);
+    const pDesorb = 0.0003 * T * Math.exp(-120 / T);
+    
+    let adsorbedCount = 0;
+    
+    // Update and draw particles
+    fractalSimParticles.forEach(p => {
+        if (p.isAdsorbed) {
+            adsorbedCount++;
+            
+            // Check for thermal desorption
+            if (Math.random() < pDesorb) {
+                p.isAdsorbed = false;
+                p.adsorbedSeg = null;
+                // Give it a kick away
+                const angle = Math.random() * Math.PI * 2;
+                p.vx = Math.cos(angle) * 1.5;
+                p.vy = Math.sin(angle) * 1.5;
             } else {
-                d.currX = d.targetX;
-                d.currY = d.targetY;
+                // Particle is adsorbed
+                const jitterRange = 0.08 * Math.sqrt(T);
+                const jitterX = (Math.random() - 0.5) * jitterRange;
+                const jitterY = (Math.random() - 0.5) * jitterRange;
+                
+                // Draw particle (glowing orange)
+                fractalSimCtx.beginPath();
+                fractalSimCtx.arc(p.snapX + jitterX, p.snapY + jitterY, 3.5, 0, Math.PI * 2);
+                fractalSimCtx.fillStyle = '#ff5500';
+                fractalSimCtx.strokeStyle = '#ffffff';
+                fractalSimCtx.lineWidth = 1;
+                fractalSimCtx.shadowColor = '#ff5500';
+                fractalSimCtx.shadowBlur = 6;
+                fractalSimCtx.fill();
+                fractalSimCtx.stroke();
+                fractalSimCtx.shadowBlur = 0; // reset
             }
-        });
-        
-        drawLabChart();
-        
-        if (!finished && ticks < 40) {
-            ticks++;
-            requestAnimationFrame(animTick);
-        }
-    }
-    animTick();
-}
-
-function drawLabChart() {
-    const svg = document.getElementById('lab-svg-chart');
-    const pointsGroup = document.getElementById('lab-data-points');
-    const axesGroup = document.getElementById('lab-axes');
-    const gridGroup = document.getElementById('lab-grid-lines');
-    const fitLine = document.getElementById('lab-fit-line');
-    
-    const width = 500;
-    const height = 350;
-    const padLeft = 60;
-    const padBottom = 60;
-    const padRight = 30;
-    const padTop = 30;
-    const plotW = width - padLeft - padRight;
-    const plotH = height - padTop - padBottom;
-
-    const gelKey = document.getElementById('select-gel').value;
-    const gel = gelDatabase[gelKey];
-
-    let gridContent = '';
-    let axesContent = '';
-
-    // Draw solid axes line (Slate)
-    axesContent += `<line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${height - padBottom}" stroke="#1e222b" stroke-width="1.5" />`;
-    axesContent += `<line x1="${padLeft}" y1="${height - padBottom}" x2="${width - padRight}" y2="${height - padBottom}" stroke="#1e222b" stroke-width="1.5" />`;
-
-    const maxRatio = Math.max(...experimentalData.map(d => d.ratio));
-    const yMaxNormal = Math.ceil(maxRatio * 1.15 * 10) / 10;
-
-    if (!isLinearized) {
-        document.getElementById('lab-x-label').textContent = "TEMPERATURA T (K)";
-        document.getElementById('lab-y-label').textContent = "ADSORCIÓN RELATIVA (n_df / n_1)";
-
-        // X labels
-        const xTicks = [150, 200, 250, 300, 350, 400, 450];
-        xTicks.forEach(tx => {
-            const x = padLeft + ((tx - xMinNorm) / (xMaxNorm - xMinNorm)) * plotW;
-            gridContent += `<line x1="${x}" y1="${padTop}" x2="${x}" y2="${height - padBottom}" stroke="rgba(255,255,255,0.015)" stroke-width="1" />`;
-            axesContent += `<text x="${x}" y="${height - padBottom + 18}" fill="#8e939d" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle">${tx} K</text>`;
-        });
-
-        // Y labels
-        const yTicks = [0, yMaxNormal / 4, yMaxNormal / 2, (yMaxNormal * 3) / 4, yMaxNormal];
-        yTicks.forEach(ty => {
-            const y = height - padBottom - (ty / yMaxNormal) * plotH;
-            gridContent += `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" stroke="rgba(255,255,255,0.015)" stroke-width="1" />`;
-            axesContent += `<text x="${padLeft - 10}" y="${y + 3}" fill="#8e939d" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="end">${ty.toFixed(2)}</text>`;
-        });
-    } else {
-        document.getElementById('lab-x-label').innerHTML = "ln( TEMPERATURA T / K )";
-        document.getElementById('lab-y-label').innerHTML = "ln( ADSORCIÓN RELATIVA n<sub>df</sub> / n<sub>1</sub> )";
-
-        const xTicks = [150, 200, 250, 300, 350, 400, 450];
-        xTicks.forEach(tx => {
-            const val = Math.log(tx);
-            const x = padLeft + ((val - xMinLin) / (xMaxLin - xMinLin)) * plotW;
-            gridContent += `<line x1="${x}" y1="${padTop}" x2="${x}" y2="${height - padBottom}" stroke="rgba(255,255,255,0.015)" stroke-width="1" />`;
-            axesContent += `<text x="${x}" y="${height - padBottom + 18}" fill="#8e939d" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle">${val.toFixed(2)}</text>`;
-        });
-
-        const yTicksVal = [];
-        for (let i = yMinLin; i <= yMaxLin; i += 0.5) yTicksVal.push(i);
-        yTicksVal.forEach(ty => {
-            const y = height - padBottom - ((ty - yMinLin) / (yMaxLin - yMinLin)) * plotH;
-            gridContent += `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" stroke="rgba(255,255,255,0.015)" stroke-width="1" />`;
-            axesContent += `<text x="${padLeft - 10}" y="${y + 3}" fill="#8e939d" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="end">${ty.toFixed(1)}</text>`;
-        });
-    }
-
-    gridGroup.innerHTML = gridContent;
-    axesGroup.innerHTML = axesContent;
-
-    // 2. Draw Data points (Leica square dots)
-    let pointsContent = '';
-    experimentalData.forEach(d => {
-        pointsContent += `
-            <rect class="dot" x="${d.currX - 3.5}" y="${d.currY - 3.5}" width="7" height="7" fill="${gel.color}" stroke="#ffffff" stroke-width="1" />
-        `;
-    });
-    pointsGroup.innerHTML = pointsContent;
-
-    // 3. Draw Fit Line
-    if (dataFit) {
-        if (!isLinearized) {
-            let dPath = '';
-            for (let tx = xMinNorm; tx <= xMaxNorm; tx += 5) {
-                const pxX = padLeft + ((tx - xMinNorm) / (xMaxNorm - xMinNorm)) * plotW;
-                const ratioFit = Math.exp(dataFit.intercept + dataFit.slope * Math.log(tx));
-                const pxY = height - padBottom - (ratioFit / yMaxNormal) * plotH;
-                if (tx === xMinNorm) dPath += `M ${pxX} ${pxY}`;
-                else dPath += ` L ${pxX} ${pxY}`;
-            }
-            fitLine.setAttribute('d', dPath);
         } else {
-            const x1_px = padLeft;
-            const y1_val = dataFit.intercept + dataFit.slope * xMinLin;
-            const y1_px = height - padBottom - ((y1_val - yMinLin) / (yMaxLin - yMinLin)) * plotH;
-
-            const x2_px = width - padRight;
-            const y2_val = dataFit.intercept + dataFit.slope * xMaxLin;
-            const y2_px = height - padBottom - ((y2_val - yMinLin) / (yMaxLin - yMinLin)) * plotH;
-
-            fitLine.setAttribute('d', `M ${x1_px} ${y1_px} L ${x2_px} ${y2_px}`);
+            // Free particle: update position using Brownian motion
+            p.vx += (Math.random() - 0.5) * 0.4;
+            p.vy += (Math.random() - 0.5) * 0.4;
+            
+            const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+            if (speed > 0) {
+                p.vx = (p.vx / speed) * velocityScale;
+                p.vy = (p.vy / speed) * velocityScale;
+            }
+            
+            p.x += p.vx;
+            p.y += p.vy;
+            
+            // Boundary collisions
+            if (p.x < 5) { p.x = 5; p.vx *= -1; }
+            if (p.x > fractalSimCanvas.width - 5) { p.x = fractalSimCanvas.width - 5; p.vx *= -1; }
+            if (p.y < 5) { p.y = 5; p.vy *= -1; }
+            if (p.y > fractalSimCanvas.height - 5) { p.y = fractalSimCanvas.height - 5; p.vy *= -1; }
+            
+            // Check collision with all fractal segments
+            let bestSeg = null;
+            let bestDist = Infinity;
+            let bestPx = 0, bestPy = 0;
+            
+            fractalSimSegments.forEach(seg => {
+                const res = distToSegmentSim(p.x, p.y, seg.x1, seg.y1, seg.x2, seg.y2);
+                if (res.dist < bestDist) {
+                    bestDist = res.dist;
+                    bestSeg = seg;
+                    bestPx = res.px;
+                    bestPy = res.py;
+                }
+            });
+            
+            // Snap if touches
+            if (bestDist < 4.5 && bestSeg !== null) {
+                p.isAdsorbed = true;
+                p.adsorbedSeg = bestSeg;
+                p.snapX = bestPx;
+                p.snapY = bestPy;
+            } else {
+                // Draw particle (diffusing cyan)
+                fractalSimCtx.beginPath();
+                fractalSimCtx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+                fractalSimCtx.fillStyle = 'rgba(0, 170, 255, 0.85)';
+                fractalSimCtx.strokeStyle = 'rgba(0, 170, 255, 0.3)';
+                fractalSimCtx.lineWidth = 2;
+                fractalSimCtx.fill();
+                fractalSimCtx.stroke();
+            }
         }
-        fitLine.style.display = 'block';
-    } else {
-        fitLine.style.display = 'none';
+    });
+    
+    // Update stats
+    document.getElementById('val-fractal-adsorbed').textContent = `${adsorbedCount} / ${FRACTAL_SIM_PARTICLE_COUNT}`;
+    
+    // Dynamic equilibrium status badge
+    const ratio = adsorbedCount / FRACTAL_SIM_PARTICLE_COUNT;
+    const statusBox = document.querySelector('#slide-8 .statistics-box .panel-header');
+    if (statusBox) {
+        if (ratio >= 0.75) {
+            statusBox.innerHTML = `METRIC PANEL: <span class="orange-text">[ SATURACIÓN ]</span>`;
+        } else if (ratio <= 0.15) {
+            statusBox.innerHTML = `METRIC PANEL: <span style="color: #ef4444;">[ DESORCIÓN TÉRMICA ]</span>`;
+        } else {
+            statusBox.innerHTML = `METRIC PANEL: <span style="color: #10b981;">[ EQUILIBRIO DINÁMICO ]</span>`;
+        }
     }
 }
 
-function fitExperimentalData() {
-    const n_points = experimentalData.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+// Distance helper
+function distToSegmentSim(x, y, x1, y1, x2, y2) {
+    const A = x - x1;
+    const B = y - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
     
-    experimentalData.forEach(d => {
-        const x = Math.log(d.T);
-        const y = Math.log(d.ratio);
-        sumX += x;
-        sumY += y;
-        sumXY += x * y;
-        sumXX += x * x;
-    });
-
-    const meanX = sumX / n_points;
-    const meanY = sumY / n_points;
-
-    const slope = (sumXY - n_points * meanX * meanY) / (sumXX - n_points * meanX * meanX);
-    const intercept = meanY - slope * meanX;
-
-    dataFit = { slope, intercept };
-
-    // slope = (d_f - 1)/2 => d_f = 1 + 2 * slope
-    const df_calculated = 1 + 2 * slope;
-
-    // Display results
-    document.getElementById('fit-slope').textContent = slope.toFixed(4);
-    document.getElementById('fit-df').textContent = df_calculated.toFixed(2);
-    document.getElementById('fit-formula').textContent = `ln(R) = ${slope.toFixed(3)}·ln(T) + (${intercept.toFixed(2)})`;
-
-    drawLabChart();
-    document.getElementById('lab-chart-hint').textContent = `[ REGRESIÓN DE AJUSTE CONCLUIDA: d_f = ${df_calculated.toFixed(2)} ]`;
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = -1;
+    if (lenSq !== 0) param = dot / lenSq;
+    
+    let xx, yy;
+    if (param < 0) {
+        xx = x1;
+        yy = y1;
+    } else if (param > 1) {
+        xx = x2;
+        yy = y2;
+    } else {
+        xx = x1 + param * C;
+        yy = y1 + param * D;
+    }
+    
+    const dx = x - xx;
+    const dy = y - yy;
+    return { dist: Math.sqrt(dx * dx + dy * dy), px: xx, py: yy };
 }
 
 // ----------------------------------------------------
@@ -2306,22 +2348,8 @@ function onSlideActivate(idx) {
     } else if (idx === 3) {
         updateDerivationStep();
     } else if (idx === 4) {
-        if (waveCanvas.width !== waveCanvas.clientWidth || waveCanvas.height !== waveCanvas.clientHeight) {
-            waveCanvas.width = waveCanvas.clientWidth;
-            waveCanvas.height = waveCanvas.clientHeight;
-        }
-        
-        document.getElementById('slider-dim').oninput = updatePhaseSpaceSim;
-        document.getElementById('slider-temp-phase').oninput = updatePhaseSpaceSim;
-        document.getElementById('slider-mass').oninput = updatePhaseSpaceSim;
-        document.getElementById('slider-dens').oninput = updatePhaseSpaceSim;
-        
-        updatePhaseSpaceSim();
-        if (!waveAnimId) runWaveAnimationLoop();
-        renderLatex('eq-lambda-t', "\\lambda_T = \\frac{h}{\\sqrt{2\\pi m k_B T}}");
-    } else if (idx === 5) {
         updateDerivationStepB();
-    } else if (idx === 6) {
+    } else if (idx === 5) {
         initAdsorpSimulator();
         
         document.getElementById('slider-temp-ad').oninput = updateAdsorpSimulation;
@@ -2329,50 +2357,19 @@ function onSlideActivate(idx) {
         document.getElementById('slider-conc-ad').oninput = updateAdsorpSimulation;
         
         updateAdsorpSimulation();
-    } else if (idx === 7) {
+    } else if (idx === 6) {
         updateDerivationStepC();
         initFractalDrawing();
         animateFractalTree();
-    } else if (idx === 8) {
-        experimentalData = [];
-        isLinearized = false;
-        dataFit = null;
+    } else if (idx === 7) {
+        initFractalSim();
         
-        document.getElementById('btn-linearize').disabled = true;
-        document.getElementById('btn-linearize').textContent = "[ LINEALIZAR LOG ]";
-        document.getElementById('btn-fit').disabled = true;
+        document.getElementById('slider-fractal-depth').oninput = updateFractalSimParams;
+        document.getElementById('slider-fractal-ratio').oninput = updateFractalSimParams;
+        document.getElementById('slider-fractal-branches').oninput = updateFractalSimParams;
+        document.getElementById('slider-fractal-temp').oninput = updateFractalSimParams;
         
-        document.getElementById('fit-slope').textContent = "--";
-        document.getElementById('fit-df').textContent = "--";
-        document.getElementById('fit-formula').textContent = "--";
-
-        const svg = document.getElementById('lab-svg-chart');
-        document.getElementById('lab-data-points').innerHTML = '';
-        document.getElementById('lab-fit-line').style.display = 'none';
-        document.getElementById('lab-chart-hint').textContent = "[ ADQUIERE DATOS DE LA MUESTRA PARA PROCEDER A SU LINEALIZACIÓN Y AJUSTE ]";
-        
-        const padLeft = 60, padBottom = 60, padRight = 30, padTop = 30;
-        const width = 500, height = 350;
-        const plotW = width - padLeft - padRight;
-        const plotH = height - padTop - padBottom;
-        
-        let axesContent = `<line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${height - padBottom}" stroke="#1e222b" stroke-width="1.5" />`;
-        axesContent += `<line x1="${padLeft}" y1="${height - padBottom}" x2="${width - padRight}" y2="${height - padBottom}" stroke="#1e222b" stroke-width="1.5" />`;
-        
-        const xTicks = [150, 200, 250, 300, 350, 400, 450];
-        xTicks.forEach(tx => {
-            const x = padLeft + ((tx - xMinNorm) / (xMaxNorm - xMinNorm)) * plotW;
-            axesContent += `<text x="${x}" y="${height - padBottom + 18}" fill="#8e939d" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle">${tx} K</text>`;
-        });
-        
-        const yTicks = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
-        yTicks.forEach(ty => {
-            const y = height - padBottom - (ty / 5.0) * plotH;
-            axesContent += `<text x="${padLeft - 10}" y="${y + 3}" fill="#8e939d" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="end">${ty.toFixed(1)}</text>`;
-        });
-        
-        document.getElementById('lab-axes').innerHTML = axesContent;
-        document.getElementById('lab-grid-lines').innerHTML = '';
+        updateFractalSimParams();
     }
 }
 
@@ -2380,16 +2377,15 @@ function onSlideActivate(idx) {
 window.onload = () => {
     window.addEventListener('resize', () => {
         if (currentSlideIndex === 2) initMoleculeViewer();
-        if (currentSlideIndex === 4) {
-            waveCanvas.width = waveCanvas.getBoundingClientRect().width;
-            waveCanvas.height = waveCanvas.getBoundingClientRect().height;
-            updatePhaseSpaceSim();
-        }
-        if (currentSlideIndex === 6) {
+        if (currentSlideIndex === 5) {
             adsorpCanvas.width = adsorpCanvas.getBoundingClientRect().width;
             adsorpCanvas.height = adsorpCanvas.getBoundingClientRect().height;
         }
-        if (currentSlideIndex === 7) initFractalDrawing();
+        if (currentSlideIndex === 6) initFractalDrawing();
+        if (currentSlideIndex === 7) {
+            resizeFractalSimCanvas();
+            updateFractalSimParams();
+        }
     });
 
     // Render LaTeX equations in HTML text elements on load
@@ -2403,16 +2399,11 @@ window.onload = () => {
         });
     }
 
-    // Hook up sample change in virtual lab
-    const selectGel = document.getElementById('select-gel');
-    if (selectGel) {
-        selectGel.onchange = () => {
-            onSlideActivate(8); // Reset lab data and chart
-        };
-    }
-
     updateNavigation();
     
     // Start adsorption simulation loop (which ticks when slide 6 is active)
     runAdsorpAnimationLoop();
+    
+    // Start fractal simulation loop (which ticks when slide 8 is active)
+    runFractalSimLoop();
 };

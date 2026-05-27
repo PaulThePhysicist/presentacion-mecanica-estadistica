@@ -1364,45 +1364,75 @@ input[type="range"]::-webkit-slider-thumb:hover {
     min-height: 320px;
 }
 
-/* Slide 5 Layout and Space Optimization */
-#slide-5 .grid-2 {
+/* Slide 6 Layout and Space Optimization */
+#slide-6 .grid-2 {
     grid-template-columns: 0.95fr 1.05fr;
     gap: 32px;
 }
 
-#slide-5 .visual-column {
+#slide-6 .visual-column {
     align-items: stretch;
     height: 100%;
 }
 
-#slide-5 .widget-card {
+#slide-6 .widget-card {
     height: 100%;
     display: flex;
     flex-direction: column;
     padding: 16px 20px; /* Compressed card padding */
 }
 
-#slide-5 .widget-card .panel-header {
+#slide-6 .widget-card .panel-header {
     margin-bottom: 12px; /* Compressed header margin */
 }
 
-#slide-5 .control-group {
+#slide-6 .control-group {
     margin-bottom: 10px; /* Compressed slider margin */
 }
 
-#slide-5 .control-group label {
+#slide-6 .control-group label {
     margin-bottom: 4px; /* Compressed label margin */
 }
 
-#slide-5 .results-grid {
+#slide-6 .results-grid {
     margin-top: 10px; /* Compressed results margin */
     padding: 10px;
 }
 
-#slide-5 .wave-visualizer {
+#slide-6 .wave-visualizer {
     flex-grow: 1;
     height: auto;
     max-height: 280px;
     min-height: 130px; /* Allows smaller height on very small viewports */
     margin-top: 10px; /* Compressed margin */
+}
+
+/* Slide 8 Layout and Space Optimization */
+#slide-8 .grid-2 {
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: 32px;
+}
+
+#slide-8 .visual-column {
+    align-items: stretch;
+    height: 100%;
+}
+
+#slide-8 .widget-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 20px; /* Compressed card padding */
+}
+
+#slide-8 .widget-card .panel-header {
+    margin-bottom: 12px; /* Compressed header margin */
+}
+
+#slide-8 .control-group {
+    margin-bottom: 10px; /* Compressed slider margin */
+}
+
+#slide-8 .control-group label {
+    margin-bottom: 4px; /* Compressed label margin */
 }
