@@ -88,6 +88,35 @@ window.addEventListener('keydown', (e) => {
     }
 });
 
+// Touch swipe navigation for mobile
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    const diffX = touchStartX - touchEndX;
+    const diffY = touchStartY - touchEndY;
+    
+    // Only trigger if horizontal swipe is significantly larger than vertical
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        // Ignore swipes on range inputs and canvas elements
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'CANVAS') return;
+        if (diffX > 0) {
+            nextSlide();
+        } else {
+            prevSlide();
+        }
+    }
+}, { passive: true });
+
 // Render LaTeX equations using KaTeX helper
 function renderLatex(elementId, latexStr, isDisplay = true) {
     const el = document.getElementById(elementId);
@@ -2907,17 +2936,25 @@ function onSlideActivate(idx) {
 
 // Global initialization
 window.onload = () => {
+    // Debounced resize handler for responsive canvas adaptation
+    let resizeTimer = null;
     window.addEventListener('resize', () => {
-        if (currentSlideIndex === 2) initMoleculeViewer();
-        if (currentSlideIndex === 5) {
-            adsorpCanvas.width = adsorpCanvas.getBoundingClientRect().width;
-            adsorpCanvas.height = adsorpCanvas.getBoundingClientRect().height;
-        }
-        if (currentSlideIndex === 6) initFractalDrawing();
-        if (currentSlideIndex === 7) {
-            resizeFractalSimCanvas();
-            updateFractalSimParams();
-        }
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            // Re-initialize canvas for the active slide
+            if (currentSlideIndex === 2) initMoleculeViewer();
+            if (currentSlideIndex === 5) {
+                const rect = adsorpCanvas.getBoundingClientRect();
+                adsorpCanvas.width = rect.width;
+                adsorpCanvas.height = rect.height;
+                updateAdsorpSimulation();
+            }
+            if (currentSlideIndex === 6) initFractalDrawing();
+            if (currentSlideIndex === 7) {
+                resizeFractalSimCanvas();
+                updateFractalSimParams();
+            }
+        }, 150);
     });
 
     // Render LaTeX equations in HTML text elements on load
