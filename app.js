@@ -48,12 +48,43 @@ function goToSlide(index) {
     }
 }
 
+// Sunlight Mode / High Contrast Toggle Logic
+window.isSunlightMode = function() {
+    return document.body.classList.contains('sunlight-mode');
+};
+
+window.toggleSunlightMode = function() {
+    document.body.classList.toggle('sunlight-mode');
+    
+    // Update toggle button text and visual class
+    const btn = document.getElementById('btn-sunlight-mode');
+    if (btn) {
+        if (document.body.classList.contains('sunlight-mode')) {
+            btn.innerHTML = '[ MODO SOL: ON ☀️ ]';
+            btn.classList.add('btn-primary');
+            btn.classList.remove('btn-secondary');
+        } else {
+            btn.innerHTML = '[ MODO SOL: OFF 🌑 ]';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+        }
+    }
+    
+    // Redraw current active slide to immediately reflect changes in canvas/simulation
+    onSlideActivate(currentSlideIndex);
+};
+
 // Keyboard navigation
 window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+        return;
+    }
     if (e.key === 'ArrowRight' || e.key === ' ') {
         nextSlide();
     } else if (e.key === 'ArrowLeft') {
         prevSlide();
+    } else if (e.key.toLowerCase() === 's') {
+        toggleSunlightMode();
     }
 });
 
@@ -949,23 +980,21 @@ function drawMoleculeViewer() {
             const tBody = tooltip.querySelector('.tooltip-body');
             
             if (isHoverHead) {
+                tooltip.style.display = 'block';
                 tTitle.textContent = "CABEZA POLAR (HIDROFÍLICA) [SO₄⁻ / COO⁻]";
                 tBody.innerHTML = "Grupo iónico cargado eléctricamente. Forma fuertes interacciones dipolo-dipolo y puentes de hidrógeno con las moléculas de agua, creando una capa de hidratación energéticamente favorable que promueve su solubilidad.";
                 tooltip.style.borderColor = '#ff5500';
                 tooltip.style.left = 'auto';
                 tooltip.style.right = '12px';
             } else if (isHoverTail) {
+                tooltip.style.display = 'block';
                 tTitle.textContent = "COLA APOLAR (HIDROFÓBICA) [-CH₂-(CH₂)₁₀-CH₃]";
                 tBody.innerHTML = "Cadena alifática neutra. Al carecer de carga o dipolos, es incapaz de enlazarse con el agua. El efecto hidrofóbico (reorganización entrópica del agua) la repele hacia la interfaz aire-agua o el núcleo micelar.";
                 tooltip.style.borderColor = '#ff5500';
                 tooltip.style.left = '12px';
                 tooltip.style.right = 'auto';
             } else {
-                tTitle.textContent = "ESTRUCTURA ANFIFÍLICA DETALLADA";
-                tBody.innerHTML = "Pasa el cursor sobre la cabeza polar (esfera naranja brillante) o la cola apolar (cadena de carbonos y oxígenos enlazados) para analizar su termodinámica de adsorción en detalle.";
-                tooltip.style.borderColor = '#1e222b';
-                tooltip.style.left = 'auto';
-                tooltip.style.right = '12px';
+                tooltip.style.display = 'none';
             }
         }
     }
@@ -982,11 +1011,11 @@ const derivationSteps = [
         title: "PASO 01: El Hamiltoniano del Sistema",
         latex: "\\mathcal{H}(\\{\\mathbf{p}_i, \\mathbf{q}_i\\}) = \\sum_{i=1}^{N}\\left(\\sum_{j=1}^{d}\\frac{p_{ij}^2}{2m} - \\varepsilon_d\\right)",
         narrative: `
-            <p>El planteamiento inicial consiste en definir el Hamiltoniano total para un sistema de $N$ partículas libres. Dado que no existen interacciones intermoleculares en el modelo de gas ideal, la energía total del sistema se expresa como la suma directa de los hamiltonianos individuales de cada partícula:</p>
-            <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; margin-top: 6px;">
-                <li>Cada partícula posee energía cinética traslacional $\\sum_{j=1}^d p_{ij}^2 / 2m$ correspondiente a su movimiento en $d$ dimensiones.</li>
-                <li>Al ingresar al medio de adsorción (superficie o gel), cada partícula experimenta un potencial atractivo constante $-\\varepsilon_d$.</li>
-                <li>El Hamiltoniano total es la suma de las contribuciones de energía cinética y potencial de cada constituyente.</li>
+            <p>Definimos el Hamiltoniano para un gas ideal de $N$ partículas no interactuantes. La energía total es la suma de las contribuciones individuales en $d$ dimensiones:</p>
+            <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; margin-top: 4px;">
+                <li>Energía cinética traslacional: $\\sum_{j=1}^d p_{ij}^2 / 2m$.</li>
+                <li>Potencial de adsorción atractivo y constante: $-\\varepsilon_d$.</li>
+                <li>Hamiltoniano total como suma directa de ambos términos.</li>
             </ul>
         `,
         scratchpad: `
@@ -1001,13 +1030,11 @@ const derivationSteps = [
         title: "PASO 02: La Integral de Partición Canónica",
         latex: "Z(T, N, V_d) = \\frac{1}{h^{dN} N!} \\int \\prod_{i=1}^{N} d^d q_i \\, d^d p_i \\; e^{-\\beta \\mathcal{H}}",
         narrative: `
-            <p>Se define la función de partición canónica $Z$ para el sistema, integrando el factor de Boltzmann sobre el espacio de fases de las $N$ partículas.</p>
-            <p>Debido a la ausencia de interacciones, la integral multidimensional sobre el espacio de fases se factoriza en un producto de integrales independientes de una sola partícula:</p>
-            <p>Esta propiedad simplifica el cálculo, reduciendo la integral de dimensión $dN$ a la potencia $N$-ésima de la función de partición de una sola partícula $z_1$:</p>
-            <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; margin-top: 6px;">
-                <li>Se incorpora el factor $1/N!$ para corregir la indistinguibilidad de las partículas de gas y evitar la paradoja de Gibbs en la entropía.</li>
-                <li>El factor de escala cuántica $h^{dN}$ se divide en contribuciones $h^d$ correspondientes al volumen elemental en el espacio de fases de cada partícula.</li>
-                <li>La variable $\\beta$ representa la temperatura inversa del baño térmico: $\\beta = 1/k_B T$.</li>
+            <p>La función de partición canónica $Z$ se integra sobre el espacio de fases. Al no haber interacciones, la integral de dimensión $dN$ se factoriza como el producto de particiones monoparticulares $z_1$:</p>
+            <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; margin-top: 4px;">
+                <li>Factor $1/N!$: corrige la indistinguibilidad para evitar la paradoja de Gibbs.</li>
+                <li>Escala cuántica $h^{dN}$: dividida en $h^d$ por cada partícula.</li>
+                <li>Temperatura inversa: $\\beta = 1/k_B T$.</li>
             </ul>
         `,
         scratchpad: `
@@ -1026,9 +1053,12 @@ const derivationSteps = [
         title: "PASO 03: Función de Partición Monoparticular",
         latex: "Z = \\frac{z_1^N}{N!}, \\qquad z_1 = e^{\\beta\\varepsilon_d} \\cdot \\frac{V_d}{\\lambda_T^d}",
         narrative: `
-            <p>Para evaluar la función de partición de una sola partícula $z_1$, se desacoplan por completo las integrales espacial y de momentos debido a la uniformidad del potencial atractivo:</p>
-            <p>Al integrar sobre las coordenadas de posición se obtiene el volumen accesible $V_d$, mientras que las integrales gaussianas de momentos se expresan en función de la longitud de onda térmica de De Broglie $\\lambda_T$:</p>
-            <p>El término resultante $\\lambda_T = h / \\sqrt{2\\pi m k_B T}$ agrupa las propiedades cuánticas del gas a una temperatura dada.</p>
+            <p>Desacoplamos las integrales espacial y de momentos gracias a la uniformidad del potencial atractivo:</p>
+            <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; margin-top: 4px;">
+                <li>Posición: da el volumen accesible $V_d$.</li>
+                <li>Momentos: integrales gaussianas en función de la longitud térmica $\\lambda_T$.</li>
+                <li>$\\lambda_T = h / \\sqrt{2\\pi m k_B T}$ agrupa los efectos térmico-cuánticos.</li>
+            </ul>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1050,9 +1080,7 @@ const derivationSteps = [
         title: "PASO 04: Energía Libre de Helmholtz",
         latex: "F = -k_BT \\ln Z \\approx -N\\varepsilon_d + Nk_BT \\ln\\!\\left(\\frac{N\\lambda_T^d}{V_d}\\right) - Nk_BT",
         narrative: `
-            <p>A partir de la función de partición canónica, se calcula la energía libre de Helmholtz mediante la relación termodinámica $F = -k_B T \\ln Z$.</p>
-            <p>Sustituyendo la expresión obtenida para $Z$ y empleando la aproximación de Stirling, $\\ln N! \\approx N \\ln N - N$, se simplifica la función de estado.</p>
-            <p>Esta aproximación es válida en el límite termodinámico de gran número de partículas ($N \\gg 1$), arrojando la forma definitiva para la energía libre.</p>
+            <p>Calculamos la energía de Helmholtz via $F = -k_B T \\ln Z$. Usando la aproximación de Stirling $\\ln N! \\approx N \\ln N - N$ en el límite termodinámico ($N \\gg 1$), simplificamos la expresión para obtener la forma final de $F$.</p>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1076,9 +1104,8 @@ const derivationSteps = [
         title: "PASO 05: Potencial Químico en d Dimensiones",
         latex: "\\mu_d = \\left.\\frac{\\partial F}{\\partial N}\\right|_{T, V_d} = -\\varepsilon_d + k_BT \\ln\\!\\left(n_d \\lambda_T^d\\right)",
         narrative: `
-            <p>El potencial químico $\\mu_d$ se define formalmente como la variación de la energía libre con respecto al número de partículas a temperatura y volumen constantes: $\\mu_d = \\left.\\frac{\\partial F}{\\partial N}\\right|_{T, V_d}$.</p>
-            <p>Al derivar término a término la expresión de Helmholtz, se produce la cancelación exacta de las constantes aditivas procedentes de la regla del producto y la aproximación de Stirling.</p>
-            <p>Finalmente, introduciendo la densidad numérica local en $d$ dimensiones, $n_d = N / V_d$, se obtiene el potencial químico exacto del sistema.</p>
+            <p>El potencial químico $\\mu_d$ es la variación de la energía libre con respecto al número de partículas: $\\mu_d = \\left.\\frac{\\partial F}{\\partial N}\\right|_{T, V_d}$.</p>
+            <p>Derivando la expresión de Helmholtz término a término e introduciendo la densidad numérica $n_d = N / V_d$, obtenemos el potencial químico del sistema.</p>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1157,7 +1184,7 @@ window.closeBorradorModal = function() {
         modal.classList.remove('active');
     }
     
-    // Remove active class from all skull buttons
+    // Remove active class from all brain buttons
     ['panic-btn-a', 'panic-btn-b', 'panic-btn-c'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
@@ -1232,8 +1259,8 @@ const derivationStepsB = [
         title: "PASO 01: Condición de Equilibrio de Fases",
         latex: "\\mu_{\\text{sol}} = \\mu_{\\text{sup}}",
         narrative: `
-            <p>El estudio de la adsorción de surfactantes en la interfaz requiere modelar la coexistencia entre el seno de la solución (fase 3D) y la capa superficial (fase 2D). En equilibrio termodinámico, existe libre intercambio de moléculas.</p>
-            <p>La condición fundamental de equilibrio de fases establece la igualdad de potenciales químicos entre la fase volumétrica y la fase adsorbida en la superficie, anulando cualquier flujo neto de materia:</p>
+            <p>En equilibrio termodinámico, el libre intercambio de moléculas entre el seno de la solución (3D) y la superficie (2D) anula cualquier flujo neto de materia.</p>
+            <p>Esto exige la igualdad de potenciales químicos entre ambas fases:</p>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1247,12 +1274,11 @@ const derivationStepsB = [
         title: "PASO 02: Igualación de Potenciales Químicos",
         latex: "k_BT\\ln(n\\,\\lambda_T^3) = -\\varepsilon_0 + k_BT\\ln(n_2\\,\\lambda_T^2)",
         narrative: `
-            <p>Se aplica la expresión general para $\\mu_d$ deducida en el literal (a), adaptando las condiciones específicas de contorno para cada una de las fases:</p>
-            <ul>
-                <li>Para el seno de la solución (3D): la dimensionalidad es $d=3$, la densidad es $n_3 = n$, y el potencial de referencia es nulo ($\\varepsilon_3 = 0$).</li>
-                <li>Para la superficie (2D): la dimensionalidad es $d=2$, la densidad es $n_2$, y existe un potencial atractivo de adsorción de valor $\\varepsilon_2 = \\varepsilon_0$.</li>
+            <p>Aplicamos $\\mu_d = -\\varepsilon_d + k_BT\\ln(n_d\\lambda_T^d)$ del literal (a) a cada fase:</p>
+            <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; margin-top: 4px;">
+                <li>Solución (3D): $d=3$, densidad $n$, sin potencial atractivo ($\\varepsilon_3 = 0$).</li>
+                <li>Superficie (2D): $d=2$, densidad $n_2$, potencial atractivo $-\\varepsilon_0$.</li>
             </ul>
-            <p>Igualando ambos términos se obtiene la ecuación rectora del equilibrio:</p>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1269,8 +1295,7 @@ const derivationStepsB = [
         title: "PASO 03: Resolución de la Densidad Superficial",
         latex: "n_2 = n\\,\\lambda_T\\, e^{\\varepsilon_0/k_BT}",
         narrative: `
-            <p>Para despejar la densidad superficial $n_2$, se dividen ambos lados de la ecuación por la energía térmica $k_B T$ y se agrupan los términos logarítmicos.</p>
-            <p>Posteriormente, aplicando la función exponencial para remover el operador logarítmico, se simplifica el cociente de densidades y longitudes de onda térmicas:</p>
+            <p>Para despejar la densidad superficial $n_2$, dividimos por $k_B T$ y agrupamos los logaritmos. Aplicando la exponencial, obtenemos el cociente de equilibrio:</p>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1292,12 +1317,11 @@ const derivationStepsB = [
         title: "PASO 04: Análisis Termodinámico y Competencia Fases",
         latex: "n_2 = n\\,\\lambda_T\\, e^{\\varepsilon_0/k_BT}",
         narrative: `
-            <p>La relación final describe la coexistencia a través de la competencia de dos mecanismos termodinámicos fundamentales:</p>
-            <ul>
-                <li><strong>Afinidad energética:</strong> El factor de Boltzmann $e^{\\varepsilon_0/k_BT}$ promueve el confinamiento y ordenamiento de las moléculas en el plano interfacial.</li>
-                <li><strong>Dispersion entrópica:</strong> El decrecimiento de la longitud térmica $\\lambda_T \\propto T^{-1/2}$ a altas temperaturas reduce la afinidad relativa de adsorción, favoreciendo la dispersión en volumen (3D) por agitación térmica.</li>
+            <p>La relación final refleja la competencia de dos efectos termodinámicos:</p>
+            <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; margin-top: 4px;">
+                <li><strong>Afinidad energética:</strong> El factor de Boltzmann $e^{\\varepsilon_0/k_BT}$ promueve el confinamiento en la interfaz.</li>
+                <li><strong>Dispersión entrópica:</strong> A alta $T$, la longitud térmica $\\lambda_T \\propto T^{-1/2}$ decrece, favoreciendo la agitación y dispersión en el volumen 3D.</li>
             </ul>
-            <p>Esta isoterma representa un modelo elemental para la adsorción física en interfaces ideales.</p>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1380,11 +1404,10 @@ const derivationStepsC = [
         title: "PASO 01: Densidad de Adsorción en Medios de Distinta Dimensión",
         latex: "n_d = n\\,\\lambda_T^{3-d}\\cdot e^{\\varepsilon_d/k_BT}",
         narrative: `
-            <p>El literal (c) propone verificar si es posible caracterizar experimentalmente la dimensión fractal $d_f$ de un gel poroso.</p>
-            <p>En primer lugar, se establece la expresión para la densidad de partículas adsorbidas en sustratos de dimensiones arbitrarias, contrastando dos sistemas físicos:</p>
-            <ul>
-                <li>El gel poroso, caracterizado por una geometría de dimensión fractal $d_f$ y energía de adsorción efectiva $\\varepsilon_f$.</li>
-                <li>Cadenas poliméricas lineales no interconectadas, correspondientes a una geometría unidimensional ($d=1$) y energía $\\varepsilon_1$.</li>
+            <p>Establecemos las expresiones para la densidad adsorbida en sustratos de dimensiones distintas en equilibrio con la misma solución 3D:</p>
+            <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; margin-top: 4px;">
+                <li>Gel poroso: dimensión fractal $d_f$, energía de adsorción $\\varepsilon_f$.</li>
+                <li>Polímeros lineales: geometría unidimensional ($d=1$), energía $\\varepsilon_1$.</li>
             </ul>
         `,
         scratchpad: `
@@ -1401,8 +1424,8 @@ const derivationStepsC = [
         title: "PASO 02: Cociente de Adsorción Relativa",
         latex: "\\frac{n_{d_f}}{n_1} = \\lambda_T^{1-d_f}\\cdot e^{(\\varepsilon_f-\\varepsilon_1)/k_BT}",
         narrative: `
-            <p>Para independizar la medida de variables volumétricas complejas, se define el cociente de adsorción relativa entre la densidad en el gel $n_{d_f}$ y en el polímero lineal $n_1$.</p>
-            <p>Al dividir ambas expresiones, la densidad del gas libre en el seno de la solución $n$ se cancela por completo de la ecuación, eliminando la necesidad de su medición directa en laboratorio. Agrupando las potencias de la longitud térmica se obtiene:</p>
+            <p>Para independizar la medida de la concentración volumétrica $n$ (difícil de medir), calculamos la relación de adsorción relativa $n_{d_f}/n_1$.</p>
+            <p>Al dividir ambas expresiones, la densidad $n$ se cancela y agrupamos las potencias de la longitud de onda térmica $\\lambda_T$:</p>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1419,8 +1442,7 @@ const derivationStepsC = [
         title: "PASO 03: Linealización del Modelo Termodinámico",
         latex: "\\ln\\!\\left(\\frac{n_{d_f}}{n_1}\\right) = \\frac{d_f - 1}{2}\\ln T + \\frac{\\varepsilon_f - \\varepsilon_1}{k_BT} + C",
         narrative: `
-            <p>Para convertir la relación termodinámica en un modelo analítico ajustable linealmente por mínimos cuadrados, se toma logaritmo natural a ambos lados de la ecuación.</p>
-            <p>Introduciendo la dependencia explícita de la longitud térmica con la temperatura, $\\lambda_T \\propto T^{-1/2}$, se desglosan las contribuciones logarítmicas de la temperatura y de las energías de activación:</p>
+            <p>Tomando logaritmo natural e introduciendo la dependencia térmica $\\lambda_T \\propto T^{-1/2}$, linealizamos la relación para obtener una ecuación de ajuste:</p>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1437,10 +1459,9 @@ const derivationStepsC = [
         title: "PASO 04: Caracterización Experimental de la Dimensión Fractal",
         latex: "\\ln\\!\\left(\\frac{n_{d_f}}{n_1}\\right) = \\frac{d_f - 1}{2}\\ln T + C",
         narrative: `
-            <p>La relación logarítmica adopta una estructura de ecuación lineal del tipo $y = m \\cdot x + C$, donde la variable independiente es $\\ln T$.</p>
-            <p>Graficando la respuesta experimental de $\\ln(n_{d_f}/n_1)$ frente a $\\ln T$ (a temperaturas donde las contribuciones de energía del sustrato se estabilicen o puedan sustraerse), la pendiente $m$ del ajuste lineal determina directamente la geometría del medio:</p>
-            <p>$m = (d_f - 1)/2 \\implies d_f = 1 + 2m$.</p>
-            <p>Este resultado confirma la viabilidad del método de caracterización térmica no invasiva para deducir dimensiones fractales de geles a partir de medidas de adsorción relativa.</p>
+            <p>La relación tiene la forma lineal $y = m \\cdot x + C$ con $x = \\ln T$. Graficando $\\ln(n_{d_f}/n_1)$ frente a $\\ln T$, la pendiente $m$ determina la dimensión fractal:</p>
+            $$m = \\frac{d_f - 1}{2} \\implies d_f = 1 + 2m$$
+            <p>Esto permite usar la temperatura como sonda geométrica directa para caracterizar el gel de forma no invasiva.</p>
         `,
         scratchpad: `
             <div class="scratchpad-box" style="margin: 0;">
@@ -1733,15 +1754,43 @@ function drawWaveOverlap(lambda, nd, d) {
 // ----------------------------------------------------
 // Slide 6: Live Adsorp Simulator (Orange Workstation style)
 // ----------------------------------------------------
+// ----------------------------------------------------
+// Slide 6: Live Adsorp Simulator (Orange Workstation style)
+// ----------------------------------------------------
 const adsorpCanvas = document.getElementById('adsorption-canvas');
-const adsorpCtx = adsorpCanvas.getContext('2d');
+const adsorpCtx = adsorpCanvas ? adsorpCanvas.getContext('2d') : null;
 let adsorpParticles = [];
 const targetParticleCount = 80;
 
+// Premium FX globals for Slide 6
+let adsorpThermalPulse = { x: 0, y: 0, radius: 0, maxRadius: 110, active: false };
+let adsorpEffects = [];
+
+function handleAdsorpCanvasClick(e) {
+    if (!adsorpCanvas) return;
+    const rect = adsorpCanvas.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * adsorpCanvas.width;
+    const y = ((e.clientY - rect.top) / rect.height) * adsorpCanvas.height;
+    
+    // Trigger thermal pulse
+    adsorpThermalPulse = {
+        x: x,
+        y: y,
+        radius: 0,
+        maxRadius: 110,
+        active: true
+    };
+}
+
 function initAdsorpSimulator() {
+    if (!adsorpCanvas) return;
     const rect = adsorpCanvas.getBoundingClientRect();
     adsorpCanvas.width = rect.width;
     adsorpCanvas.height = rect.height;
+
+    // Reset Premium FX globals
+    adsorpThermalPulse = { x: 0, y: 0, radius: 0, maxRadius: 110, active: false };
+    adsorpEffects = [];
 
     adsorpParticles = [];
     for (let i = 0; i < targetParticleCount; i++) {
@@ -1752,12 +1801,21 @@ function initAdsorpSimulator() {
             vy: (Math.random() - 0.5) * 1.4,
             radius: 2.5,
             state: 'bulk', 
-            color: '#8e939d' // slate grey
+            color: '#8e939d',
+            trail: []
         });
+    }
+
+    // Safely attach canvas click listener once
+    if (!adsorpCanvas.dataset.hasListener) {
+        adsorpCanvas.addEventListener('mousedown', handleAdsorpCanvasClick);
+        adsorpCanvas.dataset.hasListener = "true";
     }
 }
 
 function updateAdsorpSimulation() {
+    if (!adsorpCanvas || !adsorpCtx) return;
+
     const T = parseFloat(document.getElementById('slider-temp-ad').value);
     const E0 = parseFloat(document.getElementById('slider-energy-ad').value);
     const n = parseFloat(document.getElementById('slider-conc-ad').value);
@@ -1779,10 +1837,39 @@ function updateAdsorpSimulation() {
     const P_desorb = baseDesorpProb / Math.exp(E0 / (kB_eV * T));
     const P_adsorb = 0.85;
 
+    // Update and expand click thermal pulse
+    if (adsorpThermalPulse.active) {
+        adsorpThermalPulse.radius += 5;
+        if (adsorpThermalPulse.radius > adsorpThermalPulse.maxRadius) {
+            adsorpThermalPulse.active = false;
+        }
+    }
+
+    // Update effect ripples
+    adsorpEffects.forEach(fx => {
+        fx.radius += 1.5;
+        fx.alpha -= 0.04;
+    });
+    adsorpEffects = adsorpEffects.filter(fx => fx.alpha > 0);
+
     adsorpParticles.forEach(p => {
+        if (!p.trail) p.trail = [];
+
         if (p.state === 'bulk') {
             p.x += p.vx + (Math.random() - 0.5) * 0.4;
             p.y += p.vy + (Math.random() - 0.5) * 0.4;
+
+            // Push away from click thermal pulse
+            if (adsorpThermalPulse.active) {
+                const dx = p.x - adsorpThermalPulse.x;
+                const dy = p.y - adsorpThermalPulse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < adsorpThermalPulse.radius && dist > adsorpThermalPulse.radius - 16) {
+                    const angle = Math.atan2(dy, dx);
+                    p.vx += Math.cos(angle) * 1.5;
+                    p.vy += Math.sin(angle) * 1.5;
+                }
+            }
 
             if (p.x < 4 || p.x > adsorpCanvas.width - 4) p.vx *= -1;
             if (p.y > adsorpCanvas.height - 8) p.vy *= -1;
@@ -1792,6 +1879,17 @@ function updateAdsorpSimulation() {
                     p.state = 'surface';
                     p.y = interfaceY - 2;
                     p.color = '#ff5500'; // Safety orange for adsorbed
+                    p.trail = []; // reset trail
+
+                    // Trigger capture effect ripple!
+                    adsorpEffects.push({
+                        x: p.x,
+                        y: interfaceY,
+                        radius: 2,
+                        maxRadius: 18,
+                        alpha: 1.0,
+                        type: 'capture'
+                    });
                 } else {
                     p.vy *= -1;
                     p.y = interfaceY + 4;
@@ -1801,28 +1899,65 @@ function updateAdsorpSimulation() {
             p.x = Math.max(4, Math.min(adsorpCanvas.width - 4, p.x));
             p.y = Math.max(interfaceY + 2, Math.min(adsorpCanvas.height - 8, p.y));
 
+            // Update trails
+            p.trail.push({ x: p.x, y: p.y });
+            if (p.trail.length > 6) {
+                p.trail.shift();
+            }
+
         } else if (p.state === 'surface') {
             p.x += (Math.random() - 0.5) * 0.6;
             if (p.x < 4 || p.x > adsorpCanvas.width - 4) p.x = Math.max(4, Math.min(adsorpCanvas.width - 4, p.x));
 
-            if (Math.random() < P_desorb) {
+            // Jitter for adsorbed particles
+            if (p.trail && p.trail.length > 0) {
+                p.trail.shift();
+            }
+
+            // Check for thermal desorption (Arrhenius or user click thermal pulse)
+            let desorbTriggered = Math.random() < P_desorb;
+
+            if (adsorpThermalPulse.active) {
+                const dx = p.x - adsorpThermalPulse.x;
+                const dy = interfaceY - adsorpThermalPulse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < adsorpThermalPulse.radius && dist > adsorpThermalPulse.radius - 16) {
+                    desorbTriggered = true;
+                }
+            }
+
+            if (desorbTriggered) {
                 p.state = 'bulk';
                 p.y = interfaceY + 4;
-                p.vy = 0.4 + Math.random(); 
-                p.vx = (Math.random() - 0.5) * 1.4;
+                
+                // Outward kick
+                let angle = 0.4 + Math.random() * (Math.PI - 0.8); // general downward angle
+                let kickSpeed = 1.0 + Math.random();
+                
+                if (adsorpThermalPulse.active) {
+                    const dx = p.x - adsorpThermalPulse.x;
+                    const dy = interfaceY - adsorpThermalPulse.y;
+                    angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.3;
+                    kickSpeed = 2.0 + Math.random() * 1.5;
+                }
+                
+                p.vy = Math.sin(angle) * kickSpeed; 
+                p.vx = Math.cos(angle) * kickSpeed;
                 p.color = '#8e939d'; // slate grey
+                p.trail = [];
             }
         }
     });
 
     adsorpCtx.clearRect(0, 0, adsorpCanvas.width, adsorpCanvas.height);
+    const isSun = window.isSunlightMode();
 
     // Draw Solution (bulk) background - subtle slate
-    adsorpCtx.fillStyle = 'rgba(255, 255, 255, 0.008)';
+    adsorpCtx.fillStyle = isSun ? 'rgba(0, 0, 0, 0.005)' : 'rgba(255, 255, 255, 0.005)';
     adsorpCtx.fillRect(0, interfaceY, adsorpCanvas.width, adsorpCanvas.height - interfaceY);
 
     // Draw interface grid lines
-    adsorpCtx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
+    adsorpCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.015)';
     adsorpCtx.lineWidth = 1;
     for (let x = 20; x < adsorpCanvas.width; x += 20) {
         adsorpCtx.beginPath();
@@ -1831,20 +1966,127 @@ function updateAdsorpSimulation() {
         adsorpCtx.stroke();
     }
 
-    // Draw surface interface line (Orange line)
+    // Draw target crosshairs in the corners (Premium HUD)
+    const margin = 10;
+    const len = 6;
+    adsorpCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.25)' : 'rgba(255, 255, 255, 0.15)';
+    adsorpCtx.lineWidth = 1;
+    const corners = [
+        { x: margin, y: margin, dx: 1, dy: 1 },
+        { x: adsorpCanvas.width - margin, y: margin, dx: -1, dy: 1 },
+        { x: margin, y: adsorpCanvas.height - margin, dx: 1, dy: -1 },
+        { x: adsorpCanvas.width - margin, y: adsorpCanvas.height - margin, dx: -1, dy: -1 }
+    ];
+    corners.forEach(c => {
+        adsorpCtx.beginPath();
+        adsorpCtx.moveTo(c.x, c.y + c.dy * len);
+        adsorpCtx.lineTo(c.x, c.y);
+        adsorpCtx.lineTo(c.x + c.dx * len, c.y);
+        adsorpCtx.stroke();
+    });
+
+    // Draw interactive thermal shockwave
+    if (adsorpThermalPulse.active) {
+        adsorpCtx.beginPath();
+        adsorpCtx.arc(adsorpThermalPulse.x, adsorpThermalPulse.y, adsorpThermalPulse.radius, 0, Math.PI * 2);
+        const alpha = 1.0 - (adsorpThermalPulse.radius / adsorpThermalPulse.maxRadius);
+        adsorpCtx.strokeStyle = isSun ? `rgba(204, 51, 0, ${alpha * 0.8})` : `rgba(255, 85, 0, ${alpha * 0.8})`;
+        adsorpCtx.lineWidth = 3.5;
+        
+        if (!isSun) {
+            adsorpCtx.shadowColor = '#ff5500';
+            adsorpCtx.shadowBlur = 12;
+        }
+        adsorpCtx.stroke();
+        adsorpCtx.shadowBlur = 0;
+    }
+
+    // Draw effect ripples (capture)
+    adsorpCtx.lineWidth = 1.0;
+    adsorpEffects.forEach(fx => {
+        adsorpCtx.beginPath();
+        adsorpCtx.arc(fx.x, fx.y, fx.radius, 0, Math.PI * 2);
+        adsorpCtx.strokeStyle = isSun ? `rgba(0, 102, 204, ${fx.alpha})` : `rgba(0, 255, 255, ${fx.alpha})`;
+        adsorpCtx.stroke();
+    });
+
+    // Draw micro adsorption site notches along the surface interface line
+    adsorpCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)';
+    adsorpCtx.lineWidth = 1;
+    for (let sx = 10; sx < adsorpCanvas.width; sx += 15) {
+        adsorpCtx.beginPath();
+        adsorpCtx.moveTo(sx, interfaceY - 4);
+        adsorpCtx.lineTo(sx, interfaceY + 2);
+        adsorpCtx.stroke();
+    }
+
+    // Draw surface interface line (double-layered glowing Orange line)
     adsorpCtx.beginPath();
     adsorpCtx.moveTo(0, interfaceY);
     adsorpCtx.lineTo(adsorpCanvas.width, interfaceY);
-    adsorpCtx.strokeStyle = '#ff5500';
-    adsorpCtx.lineWidth = 2;
+    adsorpCtx.strokeStyle = isSun ? 'rgba(204, 51, 0, 0.15)' : 'rgba(255, 85, 0, 0.25)';
+    adsorpCtx.lineWidth = 5;
+    adsorpCtx.stroke();
+
+    adsorpCtx.beginPath();
+    adsorpCtx.moveTo(0, interfaceY);
+    adsorpCtx.lineTo(adsorpCanvas.width, interfaceY);
+    adsorpCtx.strokeStyle = isSun ? '#cc3300' : '#ff5500';
+    adsorpCtx.lineWidth = 1.8;
     adsorpCtx.stroke();
 
     // Draw particles
     adsorpParticles.forEach(p => {
-        adsorpCtx.beginPath();
-        adsorpCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        adsorpCtx.fillStyle = p.color;
-        adsorpCtx.fill();
+        if (p.state === 'bulk') {
+            // Draw trail
+            if (p.trail && p.trail.length > 1) {
+                adsorpCtx.beginPath();
+                adsorpCtx.moveTo(p.trail[0].x, p.trail[0].y);
+                for (let j = 1; j < p.trail.length; j++) {
+                    adsorpCtx.lineTo(p.trail[j].x, p.trail[j].y);
+                }
+                adsorpCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.06)';
+                adsorpCtx.lineWidth = 1.5;
+                adsorpCtx.lineCap = 'round';
+                adsorpCtx.lineJoin = 'round';
+                adsorpCtx.stroke();
+            }
+
+            // Draw core
+            adsorpCtx.beginPath();
+            adsorpCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            adsorpCtx.fillStyle = isSun ? '#475569' : '#8e939d';
+            adsorpCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.15)' : 'rgba(255, 255, 255, 0.15)';
+            adsorpCtx.lineWidth = 1.0;
+            adsorpCtx.fill();
+            adsorpCtx.stroke();
+        } else {
+            // Adsorbed: trapped crosshair + glow core
+            const jitterRange = 0.05 * Math.sqrt(T);
+            const jitterX = (Math.random() - 0.5) * jitterRange;
+            const finalX = p.x + jitterX;
+            const finalY = interfaceY - 2;
+
+            adsorpCtx.beginPath();
+            adsorpCtx.arc(finalX, finalY, 5.5, 0, Math.PI * 2);
+            adsorpCtx.strokeStyle = isSun ? 'rgba(204, 51, 0, 0.25)' : 'rgba(255, 85, 0, 0.35)';
+            adsorpCtx.lineWidth = 0.8;
+            adsorpCtx.stroke();
+
+            adsorpCtx.beginPath();
+            adsorpCtx.arc(finalX, finalY, p.radius + 0.5, 0, Math.PI * 2);
+            adsorpCtx.fillStyle = isSun ? '#cc3300' : '#ff5500';
+            adsorpCtx.strokeStyle = '#ffffff';
+            adsorpCtx.lineWidth = 1;
+            
+            if (!isSun) {
+                adsorpCtx.shadowColor = '#ff5500';
+                adsorpCtx.shadowBlur = 6;
+            }
+            adsorpCtx.fill();
+            adsorpCtx.stroke();
+            adsorpCtx.shadowBlur = 0; // reset
+        }
     });
 
     // Compute empirical stats
@@ -1855,14 +2097,26 @@ function updateAdsorpSimulation() {
     document.getElementById('val-stat-n2').innerHTML = `${n2_measured.toFixed(4)} nm<sup>-2</sup>`;
     document.getElementById('val-stat-ratio').innerHTML = `${ratio_measured.toFixed(3)} nm`;
 
+    // Dynamic HUD overlays inside the canvas
+    const telemetryY = adsorpCanvas.height - 12;
+    adsorpCtx.fillStyle = isSun ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.3)';
+    adsorpCtx.font = '8px "JetBrains Mono", monospace';
+    adsorpCtx.textAlign = 'left';
+    adsorpCtx.fillText(`BINDING_AFFINITY (\u03b5_0): ${(E0 * 1000).toFixed(0)} meV`, 15, telemetryY);
+
+    const activeGamma = Math.max(10.0, 72.8 - (n2_measured * 150)); // Simulated tension gamma = gamma0 - Pi
+    adsorpCtx.textAlign = 'right';
+    adsorpCtx.fillText(`SURF_TENSION (\u03b3): ${activeGamma.toFixed(1)} mN/m`, adsorpCanvas.width - 15, telemetryY);
+
     // Re-draw analytical SVG curve
     drawAdsorptionCurve(n, E0, T, m_mol);
 }
 
 function drawAdsorptionCurve(n, E0, currentT, m_mol) {
     const svg = document.getElementById('adsorption-svg-chart');
-    const width = 360;
-    const height = 130;
+    if (!svg) return;
+    const width = 400;
+    const height = 200;
     const paddingLeft = 45;
     const paddingBottom = 25;
     const paddingTop = 10;
@@ -1875,6 +2129,7 @@ function drawAdsorptionCurve(n, E0, currentT, m_mol) {
     const minT = 100;
     const maxT = 600;
     const m_kg = m_mol * amu;
+    const isSun = window.isSunlightMode();
 
     function calcN2(temp) {
         const lambda = (h / Math.sqrt(2 * Math.PI * m_kg * kB * temp)) * 1e9;
@@ -1891,44 +2146,71 @@ function drawAdsorptionCurve(n, E0, currentT, m_mol) {
 
     let svgContent = '';
 
-    // Draw grid lines inside chart
-    const yGridTicks = [maxVal / 2, maxVal];
-    yGridTicks.forEach(val => {
+    // Draw grid lines inside chart (Premium dashed lines)
+    const gridTicksY = [maxVal * 0.25, maxVal * 0.5, maxVal * 0.75, maxVal];
+    gridTicksY.forEach(val => {
         const y = height - paddingBottom - (val / maxVal) * plotH;
-        svgContent += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="rgba(255,255,255,0.03)" stroke-width="1" />`;
+        svgContent += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="${isSun ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.03)'}" stroke-dasharray="2 3" stroke-width="1" />`;
+    });
+
+    const gridTicksX = [200, 300, 400, 500];
+    gridTicksX.forEach(temp => {
+        const x = paddingLeft + ((temp - minT) / (maxT - minT)) * plotW;
+        svgContent += `<line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="${isSun ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.03)'}" stroke-dasharray="2 3" stroke-width="1" />`;
     });
     
     // Draw axes
-    svgContent += `<line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${height - paddingBottom}" stroke="#1e222b" stroke-width="1" />`;
-    svgContent += `<line x1="${paddingLeft}" y1="${height - paddingBottom}" x2="${width - paddingRight}" y2="${height - paddingBottom}" stroke="#1e222b" stroke-width="1" />`;
+    const axisColor = isSun ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)';
+    svgContent += `<line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${height - paddingBottom}" stroke="${axisColor}" stroke-width="1" />`;
+    svgContent += `<line x1="${paddingLeft}" y1="${height - paddingBottom}" x2="${width - paddingRight}" y2="${height - paddingBottom}" stroke="${axisColor}" stroke-width="1" />`;
 
-    // Build path
+    // Build path for curve & gradient fill
     let dPath = '';
+    let fillPath = `M ${paddingLeft} ${height - paddingBottom}`;
     points.forEach((p, idx) => {
         const x = paddingLeft + ((p.t - minT) / (maxT - minT)) * plotW;
         const y = height - paddingBottom - (p.v / maxVal) * plotH;
         if (idx === 0) dPath += `M ${x} ${y}`;
         else dPath += ` L ${x} ${y}`;
+        fillPath += ` L ${x} ${y}`;
     });
+    fillPath += ` L ${paddingLeft + plotW} ${height - paddingBottom} Z`;
 
-    svgContent += `<path d="${dPath}" fill="none" stroke="#ff5500" stroke-width="1.5" />`;
+    // Define gradients
+    svgContent += `
+    <defs>
+        <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff5500" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="#ff5500" stop-opacity="0.0"/>
+        </linearGradient>
+        <linearGradient id="curveGradientSun" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#cc3300" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#cc3300" stop-opacity="0.0"/>
+        </linearGradient>
+    </defs>
+    `;
 
-    // Current temp marker (Leica style: Orange square)
+    const gradientId = isSun ? 'curveGradientSun' : 'curveGradient';
+    svgContent += `<path d="${fillPath}" fill="url(#${gradientId})" />`;
+    svgContent += `<path d="${dPath}" fill="none" stroke="${isSun ? '#cc3300' : '#ff5500'}" stroke-width="1.8" />`;
+
+    // Current temp marker (Leica style: white dot with orange glow ring)
     const curX = paddingLeft + ((currentT - minT) / (maxT - minT)) * plotW;
     const curN2 = calcN2(currentT);
     const curY = height - paddingBottom - (curN2 / maxVal) * plotH;
 
     if (!isNaN(curY) && isFinite(curY)) {
-        svgContent += `<rect x="${curX - 3.5}" y="${curY - 3.5}" width="7" height="7" fill="#ffffff" stroke="#ff5500" stroke-width="1.5" />`;
+        svgContent += `<circle cx="${curX}" cy="${curY}" r="7" fill="none" stroke="${isSun ? '#cc3300' : '#ff5500'}" stroke-width="1.2" opacity="0.6" />`;
+        svgContent += `<circle cx="${curX}" cy="${curY}" r="3.2" fill="#ffffff" stroke="${isSun ? '#cc3300' : '#ff5500'}" stroke-width="2" />`;
     }
 
     // Y Axis labels
-    svgContent += `<text x="${paddingLeft - 8}" y="${paddingTop + 5}" fill="#4e535e" font-size="7" font-family="'JetBrains Mono', monospace" text-anchor="end">${maxVal.toFixed(2)}</text>`;
-    svgContent += `<text x="${paddingLeft - 8}" y="${height - paddingBottom}" fill="#4e535e" font-size="7" font-family="'JetBrains Mono', monospace" text-anchor="end">0.0</text>`;
+    svgContent += `<text x="${paddingLeft - 8}" y="${paddingTop + 5}" fill="#4e535e" font-size="7.5" font-family="'JetBrains Mono', monospace" text-anchor="end">${maxVal.toFixed(2)}</text>`;
+    svgContent += `<text x="${paddingLeft - 8}" y="${height - paddingBottom}" fill="#4e535e" font-size="7.5" font-family="'JetBrains Mono', monospace" text-anchor="end">0.0</text>`;
     
     // X Axis labels
-    svgContent += `<text x="${paddingLeft}" y="${height - paddingBottom + 12}" fill="#4e535e" font-size="7" font-family="'JetBrains Mono', monospace" text-anchor="middle">100K</text>`;
-    svgContent += `<text x="${paddingLeft + plotW}" y="${height - paddingBottom + 12}" fill="#4e535e" font-size="7" font-family="'JetBrains Mono', monospace" text-anchor="middle">600K</text>`;
+    svgContent += `<text x="${paddingLeft}" y="${height - paddingBottom + 12}" fill="#4e535e" font-size="7.5" font-family="'JetBrains Mono', monospace" text-anchor="middle">100K</text>`;
+    svgContent += `<text x="${paddingLeft + plotW}" y="${height - paddingBottom + 12}" fill="#4e535e" font-size="7.5" font-family="'JetBrains Mono', monospace" text-anchor="middle">600K</text>`;
     
     svg.innerHTML = svgContent;
 }
@@ -2026,12 +2308,36 @@ let fractalSimParticles = [];
 let fractalSimAnimId = null;
 const FRACTAL_SIM_PARTICLE_COUNT = 50;
 
+// Premium FX global variables
+let fractalAdsorptionHistory = [];
+let fractalThermalPulse = { x: 0, y: 0, radius: 0, maxRadius: 110, active: false };
+
+function handleFractalCanvasClick(e) {
+    if (!fractalSimCanvas) return;
+    const rect = fractalSimCanvas.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * fractalSimCanvas.width;
+    const y = ((e.clientY - rect.top) / rect.height) * fractalSimCanvas.height;
+    
+    // Trigger thermal pulse
+    fractalThermalPulse = {
+        x: x,
+        y: y,
+        radius: 0,
+        maxRadius: 110,
+        active: true
+    };
+}
+
 function initFractalSim() {
     fractalSimCanvas = document.getElementById('fractal-sim-canvas');
     if (!fractalSimCanvas) return;
     fractalSimCtx = fractalSimCanvas.getContext('2d');
     
     resizeFractalSimCanvas();
+    
+    // Reset Premium FX globals
+    fractalAdsorptionHistory = [];
+    fractalThermalPulse = { x: 0, y: 0, radius: 0, maxRadius: 110, active: false };
     
     // Create particles
     fractalSimParticles = [];
@@ -2044,8 +2350,15 @@ function initFractalSim() {
             isAdsorbed: false,
             adsorbedSeg: null,
             snapX: 0,
-            snapY: 0
+            snapY: 0,
+            trail: []
         });
+    }
+    
+    // Safely attach canvas listener once
+    if (!fractalSimCanvas.dataset.hasListener) {
+        fractalSimCanvas.addEventListener('mousedown', handleFractalCanvasClick);
+        fractalSimCanvas.dataset.hasListener = "true";
     }
     
     updateFractalSimParams();
@@ -2143,11 +2456,14 @@ function runFractalSimLoop() {
 function updateFractalSimulation() {
     if (!fractalSimCanvas || !fractalSimCtx) return;
     
+    const isSun = window.isSunlightMode();
+    const T = parseFloat(document.getElementById('slider-fractal-temp').value);
+    
     // Clear canvas
     fractalSimCtx.clearRect(0, 0, fractalSimCanvas.width, fractalSimCanvas.height);
     
     // Draw background tech grid
-    fractalSimCtx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
+    fractalSimCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.015)';
     fractalSimCtx.lineWidth = 1;
     for (let x = 20; x < fractalSimCanvas.width; x += 20) {
         fractalSimCtx.beginPath();
@@ -2162,9 +2478,47 @@ function updateFractalSimulation() {
         fractalSimCtx.stroke();
     }
     
-    const T = parseFloat(document.getElementById('slider-fractal-temp').value);
+    // Draw target crosshairs in the corners (Premium HUD)
+    const margin = 10;
+    const len = 6;
+    fractalSimCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.25)' : 'rgba(255, 255, 255, 0.15)';
+    fractalSimCtx.lineWidth = 1;
+    const corners = [
+        { x: margin, y: margin, dx: 1, dy: 1 },
+        { x: fractalSimCanvas.width - margin, y: margin, dx: -1, dy: 1 },
+        { x: margin, y: fractalSimCanvas.height - margin, dx: 1, dy: -1 },
+        { x: fractalSimCanvas.width - margin, y: fractalSimCanvas.height - margin, dx: -1, dy: -1 }
+    ];
+    corners.forEach(c => {
+        fractalSimCtx.beginPath();
+        fractalSimCtx.moveTo(c.x, c.y + c.dy * len);
+        fractalSimCtx.lineTo(c.x, c.y);
+        fractalSimCtx.lineTo(c.x + c.dx * len, c.y);
+        fractalSimCtx.stroke();
+    });
     
-    // Render fractal segments
+    // Process and draw the interactive thermal shockwave
+    if (fractalThermalPulse.active) {
+        fractalThermalPulse.radius += 5; // Expand wavefront
+        if (fractalThermalPulse.radius > fractalThermalPulse.maxRadius) {
+            fractalThermalPulse.active = false;
+        } else {
+            fractalSimCtx.beginPath();
+            fractalSimCtx.arc(fractalThermalPulse.x, fractalThermalPulse.y, fractalThermalPulse.radius, 0, Math.PI * 2);
+            const alpha = 1.0 - (fractalThermalPulse.radius / fractalThermalPulse.maxRadius);
+            fractalSimCtx.strokeStyle = isSun ? `rgba(204, 51, 0, ${alpha * 0.8})` : `rgba(255, 85, 0, ${alpha * 0.8})`;
+            fractalSimCtx.lineWidth = 3.5;
+            
+            if (!isSun) {
+                fractalSimCtx.shadowColor = '#ff5500';
+                fractalSimCtx.shadowBlur = 12;
+            }
+            fractalSimCtx.stroke();
+            fractalSimCtx.shadowBlur = 0; // Reset
+        }
+    }
+    
+    // Count adsorbed particles on each segment
     const segmentAdsorptionCount = {};
     fractalSimSegments.forEach(seg => {
         segmentAdsorptionCount[seg.id] = 0;
@@ -2176,28 +2530,68 @@ function updateFractalSimulation() {
         }
     });
     
+    // Render fractal segments (double-layered for premium glow)
     fractalSimSegments.forEach(seg => {
+        const count = segmentAdsorptionCount[seg.id] || 0;
+        
         fractalSimCtx.beginPath();
         fractalSimCtx.moveTo(seg.x1, seg.y1);
         fractalSimCtx.lineTo(seg.x2, seg.y2);
         
-        const count = segmentAdsorptionCount[seg.id] || 0;
         if (count > 0) {
-            // Glowing orange segment
-            const alpha = 0.2 + 0.15 * Math.min(count, 4);
-            fractalSimCtx.strokeStyle = `rgba(255, 85, 0, ${alpha})`;
-            fractalSimCtx.lineWidth = seg.width + 1.5;
-            fractalSimCtx.shadowColor = '#ff5500';
-            fractalSimCtx.shadowBlur = 4 + 2 * Math.min(count, 4);
+            // Glow layer
+            fractalSimCtx.strokeStyle = isSun ? `rgba(204, 51, 0, 0.2)` : `rgba(255, 85, 0, 0.25)`;
+            fractalSimCtx.lineWidth = seg.width + 4;
             fractalSimCtx.stroke();
-            fractalSimCtx.shadowBlur = 0; // reset
+            
+            // Core layer
+            fractalSimCtx.beginPath();
+            fractalSimCtx.moveTo(seg.x1, seg.y1);
+            fractalSimCtx.lineTo(seg.x2, seg.y2);
+            fractalSimCtx.strokeStyle = isSun ? '#cc3300' : '#ff7733';
+            fractalSimCtx.lineWidth = seg.width;
+            fractalSimCtx.stroke();
         } else {
-            // Clean slate-grey segment
-            fractalSimCtx.strokeStyle = 'rgba(78, 83, 94, 0.4)';
+            // Empty segment
+            fractalSimCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.15)' : 'rgba(78, 83, 94, 0.25)';
             fractalSimCtx.lineWidth = seg.width;
             fractalSimCtx.stroke();
         }
     });
+    
+    // Render junction nodes at branchings
+    fractalSimSegments.forEach(seg => {
+        const count = segmentAdsorptionCount[seg.id] || 0;
+        
+        fractalSimCtx.beginPath();
+        fractalSimCtx.arc(seg.x2, seg.y2, Math.max(1.8, seg.width * 0.9), 0, Math.PI * 2);
+        
+        if (count > 0) {
+            fractalSimCtx.fillStyle = isSun ? '#ffffff' : '#ff9955';
+            fractalSimCtx.strokeStyle = isSun ? '#cc3300' : '#ff5500';
+            fractalSimCtx.lineWidth = 1.5;
+            fractalSimCtx.fill();
+            fractalSimCtx.stroke();
+        } else {
+            fractalSimCtx.fillStyle = isSun ? '#f5f6f8' : '#1e222b';
+            fractalSimCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.25)' : 'rgba(78, 83, 94, 0.5)';
+            fractalSimCtx.lineWidth = 1;
+            fractalSimCtx.fill();
+            fractalSimCtx.stroke();
+        }
+    });
+    
+    // Draw base root node
+    if (fractalSimSegments.length > 0) {
+        const root = fractalSimSegments[0];
+        fractalSimCtx.beginPath();
+        fractalSimCtx.arc(root.x1, root.y1, 4, 0, Math.PI * 2);
+        fractalSimCtx.fillStyle = isSun ? '#f5f6f8' : '#1e222b';
+        fractalSimCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.3)' : 'rgba(78, 83, 94, 0.6)';
+        fractalSimCtx.lineWidth = 1.5;
+        fractalSimCtx.fill();
+        fractalSimCtx.stroke();
+    }
     
     // Physics values
     const velocityScale = 0.08 * Math.sqrt(T);
@@ -2210,36 +2604,88 @@ function updateFractalSimulation() {
         if (p.isAdsorbed) {
             adsorbedCount++;
             
-            // Check for thermal desorption
-            if (Math.random() < pDesorb) {
+            // Check for thermal desorption (either random or triggered by click wave)
+            let desorbTriggered = Math.random() < pDesorb;
+            
+            if (fractalThermalPulse.active) {
+                const dx = p.snapX - fractalThermalPulse.x;
+                const dy = p.snapY - fractalThermalPulse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                // Within expanding wave front
+                if (dist < fractalThermalPulse.radius && dist > fractalThermalPulse.radius - 16) {
+                    desorbTriggered = true;
+                }
+            }
+            
+            if (desorbTriggered) {
                 p.isAdsorbed = false;
                 p.adsorbedSeg = null;
-                // Give it a kick away
-                const angle = Math.random() * Math.PI * 2;
-                p.vx = Math.cos(angle) * 1.5;
-                p.vy = Math.sin(angle) * 1.5;
+                // Outward kick from segment or wave
+                let angle = Math.random() * Math.PI * 2;
+                let kickSpeed = 1.5;
+                
+                if (fractalThermalPulse.active) {
+                    const dx = p.snapX - fractalThermalPulse.x;
+                    const dy = p.snapY - fractalThermalPulse.y;
+                    angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.4;
+                    kickSpeed = 2.5 + Math.random() * 1.5;
+                }
+                
+                p.vx = Math.cos(angle) * kickSpeed;
+                p.vy = Math.sin(angle) * kickSpeed;
+                p.x = p.snapX + Math.cos(angle) * 5;
+                p.y = p.snapY + Math.sin(angle) * 5;
+                p.trail = []; // reset trail for clean flight
             } else {
-                // Particle is adsorbed
+                // Particle remains adsorbed (vibrates gently)
                 const jitterRange = 0.08 * Math.sqrt(T);
                 const jitterX = (Math.random() - 0.5) * jitterRange;
                 const jitterY = (Math.random() - 0.5) * jitterRange;
+                const finalX = p.snapX + jitterX;
+                const finalY = p.snapY + jitterY;
                 
-                // Draw particle (glowing orange)
+                if (p.trail && p.trail.length > 0) {
+                    p.trail.shift(); // fade trail while bound
+                }
+                
+                // Trapped confinement crosshair
                 fractalSimCtx.beginPath();
-                fractalSimCtx.arc(p.snapX + jitterX, p.snapY + jitterY, 3.5, 0, Math.PI * 2);
-                fractalSimCtx.fillStyle = '#ff5500';
+                fractalSimCtx.arc(finalX, finalY, 5.5, 0, Math.PI * 2);
+                fractalSimCtx.strokeStyle = isSun ? 'rgba(204, 51, 0, 0.25)' : 'rgba(255, 85, 0, 0.35)';
+                fractalSimCtx.lineWidth = 0.8;
+                fractalSimCtx.stroke();
+                
+                // Draw particle (glowing orange core)
+                fractalSimCtx.beginPath();
+                fractalSimCtx.arc(finalX, finalY, 3.2, 0, Math.PI * 2);
+                fractalSimCtx.fillStyle = isSun ? '#cc3300' : '#ff5500';
                 fractalSimCtx.strokeStyle = '#ffffff';
                 fractalSimCtx.lineWidth = 1;
-                fractalSimCtx.shadowColor = '#ff5500';
-                fractalSimCtx.shadowBlur = 6;
+                
+                if (!isSun) {
+                    fractalSimCtx.shadowColor = '#ff5500';
+                    fractalSimCtx.shadowBlur = 6;
+                }
                 fractalSimCtx.fill();
                 fractalSimCtx.stroke();
                 fractalSimCtx.shadowBlur = 0; // reset
             }
         } else {
-            // Free particle: update position using Brownian motion
+            // Free particle: Brownian motion
             p.vx += (Math.random() - 0.5) * 0.4;
             p.vy += (Math.random() - 0.5) * 0.4;
+            
+            // Accel away from thermal shockwave
+            if (fractalThermalPulse.active) {
+                const dx = p.x - fractalThermalPulse.x;
+                const dy = p.y - fractalThermalPulse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < fractalThermalPulse.radius && dist > fractalThermalPulse.radius - 16) {
+                    const angle = Math.atan2(dy, dx);
+                    p.vx += Math.cos(angle) * 2.0;
+                    p.vy += Math.sin(angle) * 2.0;
+                }
+            }
             
             const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
             if (speed > 0) {
@@ -2255,6 +2701,13 @@ function updateFractalSimulation() {
             if (p.x > fractalSimCanvas.width - 5) { p.x = fractalSimCanvas.width - 5; p.vx *= -1; }
             if (p.y < 5) { p.y = 5; p.vy *= -1; }
             if (p.y > fractalSimCanvas.height - 5) { p.y = fractalSimCanvas.height - 5; p.vy *= -1; }
+            
+            // Update trail
+            if (!p.trail) p.trail = [];
+            p.trail.push({ x: p.x, y: p.y });
+            if (p.trail.length > 7) {
+                p.trail.shift();
+            }
             
             // Check collision with all fractal segments
             let bestSeg = null;
@@ -2277,13 +2730,28 @@ function updateFractalSimulation() {
                 p.adsorbedSeg = bestSeg;
                 p.snapX = bestPx;
                 p.snapY = bestPy;
+                p.trail = []; // Clear trail
             } else {
-                // Draw particle (diffusing cyan)
+                // Draw particle trail (cian glow)
+                if (p.trail.length > 1) {
+                    fractalSimCtx.beginPath();
+                    fractalSimCtx.moveTo(p.trail[0].x, p.trail[0].y);
+                    for (let j = 1; j < p.trail.length; j++) {
+                        fractalSimCtx.lineTo(p.trail[j].x, p.trail[j].y);
+                    }
+                    fractalSimCtx.strokeStyle = isSun ? 'rgba(0, 120, 200, 0.15)' : 'rgba(0, 190, 255, 0.25)';
+                    fractalSimCtx.lineWidth = 1.8;
+                    fractalSimCtx.lineCap = 'round';
+                    fractalSimCtx.lineJoin = 'round';
+                    fractalSimCtx.stroke();
+                }
+                
+                // Draw particle core
                 fractalSimCtx.beginPath();
                 fractalSimCtx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
-                fractalSimCtx.fillStyle = 'rgba(0, 170, 255, 0.85)';
-                fractalSimCtx.strokeStyle = 'rgba(0, 170, 255, 0.3)';
-                fractalSimCtx.lineWidth = 2;
+                fractalSimCtx.fillStyle = isSun ? '#0066cc' : 'rgba(0, 170, 255, 0.9)';
+                fractalSimCtx.strokeStyle = isSun ? 'rgba(0, 102, 204, 0.3)' : 'rgba(0, 255, 255, 0.4)';
+                fractalSimCtx.lineWidth = 1.5;
                 fractalSimCtx.fill();
                 fractalSimCtx.stroke();
             }
@@ -2293,7 +2761,7 @@ function updateFractalSimulation() {
     // Update stats
     document.getElementById('val-fractal-adsorbed').textContent = `${adsorbedCount} / ${FRACTAL_SIM_PARTICLE_COUNT}`;
     
-    // Dynamic equilibrium status badge
+    // Update dynamic equilibrium status badge
     const ratio = adsorbedCount / FRACTAL_SIM_PARTICLE_COUNT;
     const statusBox = document.querySelector('#slide-8 .statistics-box .panel-header');
     if (statusBox) {
@@ -2305,6 +2773,70 @@ function updateFractalSimulation() {
             statusBox.innerHTML = `METRIC PANEL: <span style="color: #10b981;">[ EQUILIBRIO DINÁMICO ]</span>`;
         }
     }
+    
+    // Mini-oscilloscope in top right
+    const graphW = 120;
+    const graphH = 50;
+    const graphX = fractalSimCanvas.width - graphW - 15;
+    const graphY = 15;
+    
+    fractalAdsorptionHistory.push(ratio);
+    if (fractalAdsorptionHistory.length > graphW) {
+        fractalAdsorptionHistory.shift();
+    }
+    
+    // Draw oscilloscope card
+    fractalSimCtx.fillStyle = isSun ? 'rgba(255, 255, 255, 0.85)' : 'rgba(7, 8, 10, 0.8)';
+    fractalSimCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.08)';
+    fractalSimCtx.lineWidth = 1;
+    fractalSimCtx.fillRect(graphX, graphY, graphW, graphH);
+    fractalSimCtx.strokeRect(graphX, graphY, graphW, graphH);
+    
+    // Draw grid lines inside mini-oscilloscope
+    fractalSimCtx.strokeStyle = isSun ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.04)';
+    fractalSimCtx.lineWidth = 0.5;
+    fractalSimCtx.beginPath();
+    fractalSimCtx.moveTo(graphX, graphY + graphH / 2);
+    fractalSimCtx.lineTo(graphX + graphW, graphY + graphH / 2);
+    fractalSimCtx.stroke();
+    for (let gx = 20; gx < graphW; gx += 20) {
+        fractalSimCtx.beginPath();
+        fractalSimCtx.moveTo(graphX + gx, graphY);
+        fractalSimCtx.lineTo(graphX + gx, graphY + graphH);
+        fractalSimCtx.stroke();
+    }
+    
+    // Plot history line
+    if (fractalAdsorptionHistory.length > 1) {
+        fractalSimCtx.beginPath();
+        const startX = graphX + (graphW - fractalAdsorptionHistory.length);
+        fractalSimCtx.moveTo(startX, graphY + graphH - fractalAdsorptionHistory[0] * graphH);
+        for (let i = 1; i < fractalAdsorptionHistory.length; i++) {
+            fractalSimCtx.lineTo(startX + i, graphY + graphH - fractalAdsorptionHistory[i] * graphH);
+        }
+        fractalSimCtx.strokeStyle = isSun ? '#cc3300' : '#ff5500';
+        fractalSimCtx.lineWidth = 1.5;
+        fractalSimCtx.stroke();
+    }
+    
+    // Draw HUD text inside mini chart
+    fractalSimCtx.fillStyle = isSun ? 'rgba(0, 0, 0, 0.45)' : 'rgba(255, 255, 255, 0.35)';
+    fractalSimCtx.font = '7.5px "JetBrains Mono", monospace';
+    fractalSimCtx.textAlign = 'left';
+    fractalSimCtx.fillText('ADSORPTION RATE', graphX + 5, graphY + 10);
+    fractalSimCtx.textAlign = 'right';
+    fractalSimCtx.fillText(`${Math.round(ratio * 100)}%`, graphX + graphW - 5, graphY + 10);
+    
+    // Technical coordinates HUD in the corners
+    const telemetryY = fractalSimCanvas.height - 12;
+    fractalSimCtx.fillStyle = isSun ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.3)';
+    fractalSimCtx.font = '8px "JetBrains Mono", monospace';
+    fractalSimCtx.textAlign = 'left';
+    fractalSimCtx.fillText(`THERMAL_ENERGY (k_B T): ${(T * 0.0862).toFixed(2)} meV`, 15, telemetryY);
+    
+    const meanSpeed = 12.5 * Math.sqrt(T);
+    fractalSimCtx.textAlign = 'right';
+    fractalSimCtx.fillText(`MEAN_SPEED: ${meanSpeed.toFixed(0)} m/s`, fractalSimCanvas.width - 15, telemetryY);
 }
 
 // Distance helper

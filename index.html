@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Estación de trabajo técnica sobre la adsorción de surfactantes en geles fractales, basada en principios de física estadística.">
+    <meta name="description" content="Estación de trabajo técnica sobre la adsorción de surfactantes en geles fractales, basada en principios de mecánica estadística.">
     <title>LAB // Adsorción de Surfactantes en Geles Fractales</title>
     
     <!-- Google Fonts: Lora (Editorial serif), Inter (Clean body), JetBrains Mono (Technical) -->
@@ -27,6 +27,9 @@
             <span class="logo-accent">SYS //</span> SURFACTANT_ADSORPTION.d
         </div>
         <div class="header-status">
+            <button class="btn btn-secondary btn-sm" id="btn-sunlight-mode" onclick="toggleSunlightMode()" style="margin-right: 15px; font-size: 0.72rem; padding: 4px 12px; height: 30px;">
+                [ MODO SOL: OFF 🌑 ]
+            </button>
             <span class="status-indicator"></span> STATUS: ACTIVE_SIMULATION
         </div>
         <div class="slide-counter" id="slide-indicator">01 / 09</div>
@@ -40,22 +43,21 @@
             <div class="slide-content grid-2">
                 <div class="text-column" style="justify-content: center;">
                     <div class="technical-panel hero-panel" style="max-width: 100%; width: 100%; padding: 32px; border-color: var(--border-color); display: flex; flex-direction: column; justify-content: center; height: 100%;">
-                        <span class="badge">[ LAB_STAT_PHYS // EJERCICIO_06 ]</span>
-                        <h1 class="hero-title" style="font-size: 3.0rem; line-height: 1.1; margin-bottom: 12px;">Adsorción de Surfactantes</h1>
-                        <p class="hero-subtitle" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 16px;">Estudio de transiciones dimensionales: de interfaces bidimensionales a la complejidad fractal en geles.</p>
+                        <span class="badge">[ KARDAR // EJERCICIO_06 ]</span>
+                        <h1 class="hero-title" style="font-size: calc(3.0rem + 4px); line-height: 1.1; margin-bottom: 12px;">Adsorción de Surfactantes</h1>
+
                         <div class="technical-divider" style="margin: 16px 0;"></div>
-                        <div class="hero-metadata-grid" style="margin-bottom: 24px; gap: 12px;">
+                        <div class="hero-metadata-grid" style="margin-bottom: 24px; gap: 16px; grid-template-columns: 1.2fr 1fr;">
                             <div class="meta-cell">
-                                <span class="meta-label">SUSTRATO:</span>
-                                <span class="meta-value" style="font-size: 0.8rem;">d-dimensional (1D, 2D, d_f)</span>
+                                <span class="meta-label">AUTORES:</span>
+                                <span class="meta-value" style="font-size: calc(0.8rem + 4px);">Anyei Garces, Paul Martinez, Juan Quintero, William Rincon</span>
                             </div>
                             <div class="meta-cell">
-                                <span class="meta-label">SISTEMA:</span>
-                                <span class="meta-value" style="font-size: 0.8rem;">Gas ideal clásico diluido</span>
-                            </div>
-                            <div class="meta-cell">
-                                <span class="meta-label">AUTOR:</span>
-                                <span class="meta-value" style="font-size: 0.8rem;">Física Estadística</span>
+                                <span class="meta-label">INSTITUCIÓN:</span>
+                                <span class="meta-value" style="font-size: calc(0.8rem + 4px); line-height: 1.35;">
+                                    Universidad Nacional de Colombia<br>
+                                    <span style="color: var(--accent-green); font-size: calc(0.72rem + 4px); font-weight: 500;">Departamento de Física</span>
+                                </span>
                             </div>
                         </div>
                         <div class="hero-actions">
@@ -71,9 +73,13 @@
                         <div class="qr-card">
                             <img src="qr-code.svg" alt="Código QR de la Presentación" class="qr-image" />
                         </div>
-                        <div class="tech-mono" style="font-size: 0.72rem; color: var(--text-dim); margin-top: 20px; text-align: center; line-height: 1.4;">
+                        <div class="tech-mono" style="font-size: calc(0.72rem + 4px); color: var(--text-dim); margin-top: 20px; text-align: center; line-height: 1.4;">
                             <span class="orange-text">[ ESCANEAR QR ]</span> para ver online<br>
-                            <span style="font-size: 0.65rem; color: var(--text-muted); word-break: break-all; display: block; margin-top: 4px;">https://paulthephysicist.github.io/presentacion-mecanica-estadistica/</span>
+                            <span style="font-size: calc(0.65rem + 4px); color: var(--text-muted); word-break: break-all; display: block; margin-top: 4px; margin-bottom: 12px;">https://paulthephysicist.github.io/presentacion-mecanica-estadistica/</span>
+                            <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; font-size: calc(0.65rem + 4px); color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">
+                                <span>SYS_REF // UNAL_2026</span>
+                                <span style="color: var(--accent-green); font-weight: 600;">[ DEPT_FÍSICA ]</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -88,50 +94,34 @@
                     <h2>Adsorción de Surfactantes en Geles</h2>
                     
                     <div class="technical-panel info-box">
-                        <p class="highlight" style="font-size: 1.02rem; line-height: 1.5; margin: 0; padding-left: 12px;">
+                        <p class="highlight" style="font-size: calc(1.02rem + 4px); line-height: 1.5; margin: 0; padding-left: 12px;">
                             Una solución diluida de surfactantes puede tratarse como un gas ideal tridimensional. Las moléculas de surfactante pueden reducir su energía al entrar en contacto con el aire, por lo que una fracción de ellas migra a la superficie (gas ideal 2D). Los surfactantes son igualmente adsorbidos por medios porosos como polímeros y geles que tienen afinidad por ellos.
                         </p>
                     </div>
 
-                    <div class="technical-panel">
-                        <div class="panel-header">DIAGRAMA DE FASES Y SUSTRATOS</div>
-                        <div style="display: flex; gap: 12px; margin-top: 4px; font-family: var(--font-tech); font-size: 0.75rem;">
-                            <div style="flex: 1; border: 1px solid var(--border-color); padding: 10px; border-radius: 2px; background: rgba(255,255,255,0.01);">
-                                <span class="orange-text">[ 3D ] SOLUCIÓN</span>
-                                <div style="color: var(--text-dim); margin-top: 4px; line-height: 1.3;">Gas ideal en volumen tridimensional ($d=3$, $\varepsilon_3=0$).</div>
-                            </div>
-                            <div style="flex: 1; border: 1px solid var(--border-color); padding: 10px; border-radius: 2px; background: rgba(255,255,255,0.01);">
-                                <span class="orange-text">[ 2D ] SUPERFICIE</span>
-                                <div style="color: var(--text-dim); margin-top: 4px; line-height: 1.3;">Capa superficial con ganancia energética $\varepsilon_0$ ($d=2$, $\varepsilon_2=\varepsilon_0$).</div>
-                            </div>
-                            <div style="flex: 1; border: 1px solid var(--border-color); padding: 10px; border-radius: 2px; background: rgba(255,255,255,0.01);">
-                                <span class="orange-text">[ d_f ] GEL FRACTAL</span>
-                                <div style="color: var(--text-dim); margin-top: 4px; line-height: 1.3;">Red de polímeros entrecruzados de dimensión fractal $d_f$.</div>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
                 <div class="visual-column" style="display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%; justify-content: center;">
                     <div class="technical-panel" style="width: 100%; padding: 14px 18px;">
                         <span class="badge">[ PARTE_A ]</span>
-                        <p style="font-size: 0.85rem; line-height: 1.35; color: var(--text-light); margin: 0;">
+                        <p style="font-size: calc(0.85rem + 4px); line-height: 1.35; color: var(--text-light); margin: 0;">
                             Considera un gas ideal de partículas clásicas de masa $m$ en $d$ dimensiones en un potencial atractivo $-\varepsilon_d$. Muestra que el potencial químico es:
                         </p>
-                        <div class="equation-box-small" style="margin: 6px 0 0 0; font-size: 0.8rem; padding: 4px 8px;">
+                        <div class="equation-box-small" style="margin: 6px 0 0 0; font-size: calc(0.8rem + 6px); padding: 4px 8px;">
                             $\mu_d = -\varepsilon_d + k_BT \ln(n_d \lambda_T^d), \quad \lambda_T = \frac{h}{\sqrt{2\pi m k_B T}}$
                         </div>
                     </div>
                     
                     <div class="technical-panel" style="width: 100%; padding: 14px 18px;">
                         <span class="badge">[ PARTE_B ]</span>
-                        <p style="font-size: 0.85rem; line-height: 1.35; color: var(--text-light); margin: 0;">
+                        <p style="font-size: calc(0.85rem + 4px); line-height: 1.35; color: var(--text-light); margin: 0;">
                             Si un surfactante reduce su energía en $\varepsilon_0$ al moverse a la superficie, calcula la concentración superficial de equilibrio $n_2$ como función de la concentración en solución $n = n_3$ a temperatura $T$.
                         </p>
                     </div>
                     
                     <div class="technical-panel" style="width: 100%; padding: 14px 18px;">
                         <span class="badge">[ PARTE_C ]</span>
-                        <p style="font-size: 0.85rem; line-height: 1.35; color: var(--text-light); margin: 0;">
+                        <p style="font-size: calc(0.85rem + 4px); line-height: 1.35; color: var(--text-light); margin: 0;">
                             ¿Puede testearse experimentalmente si un gel poroso es fractal de dimensión $d_f$ comparando la adsorción relativa en el gel ($n_{d_f}$) versus la de polímeros lineales individuales ($n_1$) en función de $T$?
                         </p>
                     </div>
@@ -144,15 +134,15 @@
             <div class="slide-content grid-2">
                 <div class="text-column">
                     <span class="badge">[ CONFIG_SISTEMA ]</span>
-                    <h2>Naturaleza Dual de los Surfactantes</h2>
-                    <p class="highlight">Las moléculas de surfactante poseen una estructura anfifílica: una cabeza polar (hidrofílica) y una cola hidrocarbonada apolar (hidrofóbica).</p>
+                    <h2>Naturaleza de los Surfactantes</h2>
+                    <p class="highlight">Estructura anfifílica: cabeza polar (hidrofílica) y cola apolar (hidrofóbica).</p>
                     
-                    <div class="technical-panel info-box">
-                        <h3>Mecanismo de Adsorción</h3>
-                        <p>Al migrar de la solución en volumen (3D) a la superficie (2D), las colas evitan el contacto con el agua, reduciendo la energía libre del sistema. Este proceso espontáneo de auto-ensamblaje modifica drásticamente las propiedades termodinámicas de la interfaz.</p>
+                    <div class="technical-panel info-box" style="padding: 16px; margin: 8px 0;">
+                        <h3 style="font-size: calc(1.1rem + 4px); margin-bottom: 6px;">Mecanismo de Adsorción</h3>
+                        <p style="font-size: calc(0.9rem + 4px); line-height: 1.45;">Al migrar de la solución (3D) a la superficie (2D), las colas evitan el agua, reduciendo la energía libre. Este auto-ensamblaje espontáneo altera las propiedades termodinámicas de la interfaz.</p>
                     </div>
                     
-                    <p>En medios porosos complejos, la adsorción se ve restringida por la topología interna del gel, obligando a tratar la fase adsorbida en un espacio geométrico de dimensiones no enteras ($d_f$).</p>
+                    <p style="font-size: calc(0.9rem + 4px); line-height: 1.45;">En geles o medios porosos, la topología interna restringe la adsorción a un espacio fractal de dimensión efectiva $d_f$.</p>
                 </div>
                 <div class="visual-column">
                     <div class="technical-panel widget-card">
@@ -217,7 +207,7 @@
                         </div>
                         
                         <!-- Dynamic narrative content container -->
-                        <div id="step-narrative" class="math-step-content" style="font-size: 0.88rem; line-height: 1.45; color: var(--text-dim);">
+                        <div id="step-narrative" class="math-step-content" style="font-size: calc(0.88rem + 4px); line-height: 1.45; color: var(--text-dim);">
                             <!-- Dynamically populated by JS -->
                         </div>
 
@@ -233,7 +223,7 @@
                     <div class="technical-panel widget-card math-explanation-card" style="min-height: auto; width: 100%;">
                         <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                             <span id="step-title">1. Hamiltoniano del Sistema</span>
-                            <button class="btn-panic" id="panic-btn-a" onclick="toggleBorrador('a')">[ 💀 ]</button>
+                            <button class="btn-panic" id="panic-btn-a" onclick="toggleBorrador('a')">🧠</button>
                         </div>
                         <div class="math-step-content" id="step-content">
                             <!-- Dynamically populated by JS -->
@@ -256,7 +246,7 @@
                         </div>
                         
                         <!-- Dynamic narrative content container for slide 6 -->
-                        <div id="step-narrative-b" class="math-step-content" style="font-size: 0.88rem; line-height: 1.45; color: var(--text-dim);">
+                        <div id="step-narrative-b" class="math-step-content" style="font-size: calc(0.88rem + 4px); line-height: 1.45; color: var(--text-dim);">
                             <!-- Dynamically populated by JS -->
                         </div>
 
@@ -272,7 +262,7 @@
                     <div class="technical-panel widget-card math-explanation-card" style="min-height: auto; width: 100%;">
                         <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                             <span id="step-title-b">1. Condición de Equilibrio</span>
-                            <button class="btn-panic" id="panic-btn-b" onclick="toggleBorrador('b')">[ 💀 ]</button>
+                            <button class="btn-panic" id="panic-btn-b" onclick="toggleBorrador('b')">🧠</button>
                         </div>
                         <div class="math-step-content" id="step-content-b">
                             <!-- Dynamically populated by JS -->
@@ -329,6 +319,9 @@
                                 <svg id="adsorption-svg-chart" viewBox="0 0 400 200"></svg>
                             </div>
                         </div>
+                        <div class="controls-hint">
+                            [ CONTROL: HAZ CLIC EN EL MONITOR PARA PROVOCAR UN PULSO TÉRMICO Y DESORBER SURFACTANTES ]
+                        </div>
                     </div>
                 </div>
             </div>
@@ -347,7 +340,7 @@
                         </div>
                         
                         <!-- Dynamic narrative content container for slide 8 -->
-                        <div id="step-narrative-c" class="math-step-content" style="font-size: 0.88rem; line-height: 1.45; color: var(--text-dim);">
+                        <div id="step-narrative-c" class="math-step-content" style="font-size: calc(0.88rem + 4px); line-height: 1.45; color: var(--text-dim);">
                             <!-- Dynamically populated by JS -->
                         </div>
 
@@ -363,7 +356,7 @@
                     <div class="technical-panel widget-card math-explanation-card" style="min-height: auto; width: 100%;">
                         <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                             <span id="step-title-c">1. Hipótesis de Adsorción</span>
-                            <button class="btn-panic" id="panic-btn-c" onclick="toggleBorrador('c')">[ 💀 ]</button>
+                            <button class="btn-panic" id="panic-btn-c" onclick="toggleBorrador('c')">🧠</button>
                         </div>
                         <div class="math-step-content" id="step-content-c">
                         </div>
@@ -423,7 +416,7 @@
                             <canvas id="fractal-sim-canvas" style="width:100%; height:100%; display:block;"></canvas>
                         </div>
                         <div class="controls-hint">
-                            [ MÓDULO ACTIVO: LA TEMPERATURA GENERA AGITACIÓN Y DESORCIÓN ]
+                            [ CONTROL: HAZ CLIC EN EL MONITOR PARA PROVOCAR UN PULSO TÉRMICO Y DESORBER SURFACTANTES ]
                         </div>
                     </div>
                 </div>
@@ -436,16 +429,16 @@
                 <div class="text-column">
                     <span class="badge">[ INFORME_SÍNTESIS ]</span>
                     <h2>Conclusiones del Análisis</h2>
-                    <p class="highlight">La física estadística provee un puente directo entre la microestructura geométrica de geles (escala nanométrica) y las observaciones experimentales macroscópicas.</p>
+                    <p class="highlight">La mecánica estadística vincula la microestructura geométrica del gel con las observaciones macroscópicas.</p>
                     
-                    <div class="technical-panel conclusion-item">
-                        <h3>Sensibilidad Dimensional de la Entropía</h3>
-                        <p>El término $n_d \lambda_T^d$ demuestra cómo la escala cuántica $\lambda_T(T)$ incide de forma diferente según la dimensionalidad $d$, condicionando la isoterma de adsorción.</p>
+                    <div class="technical-panel conclusion-item" style="padding: 16px; margin: 8px 0;">
+                        <h3 style="font-size: calc(1.1rem + 4px); margin-bottom: 6px;">Sensibilidad Entrópica</h3>
+                        <p style="font-size: calc(0.9rem + 4px); line-height: 1.45;">El término $n_d \lambda_T^d$ ilustra cómo la dimensión $d$ incide en la entropía traslacional, condicionando la isoterma de adsorción.</p>
                     </div>
                     
-                    <div class="technical-panel conclusion-item mt-3">
-                        <h3>La Firma Geométrica Termodinámica</h3>
-                        <p>La adsorción relativa $n_{d_f}/n_1 \propto T^{(d_f-1)/2}$ permite aislar la dimensión fractal $d_f$ en la pendiente de la curva de logaritmos. Esto convierte a la temperatura en una sonda geométrica directa.</p>
+                    <div class="technical-panel conclusion-item mt-3" style="padding: 16px; margin: 8px 0;">
+                        <h3 style="font-size: calc(1.1rem + 4px); margin-bottom: 6px;">Firma Geométrica</h3>
+                        <p style="font-size: calc(0.9rem + 4px); line-height: 1.45;">La adsorción relativa $n_{d_f}/n_1 \propto T^{(d_f-1)/2}$ aísla la dimensión fractal $d_f$ en la pendiente logarítmica, usando la temperatura como sonda directa.</p>
                     </div>
                 </div>
                 <div class="visual-column">
@@ -471,7 +464,7 @@
     <!-- Workstation Control Panel Footer -->
     <footer class="app-footer">
         <div class="kbd-shortcuts tech-mono">
-            SYS_NAV: [←] PREV // [→] NEXT // [SPACE] FORWARD
+            SYS_NAV: [←] PREV // [→] NEXT // [SPACE] FORWARD // [S] MODO SOL
         </div>
         <div class="footer-nav-buttons">
             <button class="btn-icon" onclick="prevSlide()" aria-label="Slide anterior">
