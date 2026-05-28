@@ -37,28 +37,44 @@
         
         <!-- Slide 1: Portada Hero (Editorial / Scientific Poster style) -->
         <section class="slide active" id="slide-1" data-title="[01] PORTADA">
-            <div class="slide-content hero-slide">
-                <div class="technical-panel hero-panel">
-                    <span class="badge">[ LAB_STAT_PHYS // EJERCICIO_06 ]</span>
-                    <h1 class="hero-title">Adsorción de Surfactantes</h1>
-                    <p class="hero-subtitle">Estudio de transiciones dimensionales: de interfaces bidimensionales a la complejidad fractal en geles.</p>
-                    <div class="technical-divider"></div>
-                    <div class="hero-metadata-grid">
-                        <div class="meta-cell">
-                            <span class="meta-label">SUSTRATO:</span>
-                            <span class="meta-value">d-dimensional (1D, 2D, d_f)</span>
+            <div class="slide-content grid-2">
+                <div class="text-column" style="justify-content: center;">
+                    <div class="technical-panel hero-panel" style="max-width: 100%; width: 100%; padding: 32px; border-color: var(--border-color); display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                        <span class="badge">[ LAB_STAT_PHYS // EJERCICIO_06 ]</span>
+                        <h1 class="hero-title" style="font-size: 3.0rem; line-height: 1.1; margin-bottom: 12px;">Adsorción de Surfactantes</h1>
+                        <p class="hero-subtitle" style="font-size: 1.1rem; line-height: 1.4; margin-bottom: 16px;">Estudio de transiciones dimensionales: de interfaces bidimensionales a la complejidad fractal en geles.</p>
+                        <div class="technical-divider" style="margin: 16px 0;"></div>
+                        <div class="hero-metadata-grid" style="margin-bottom: 24px; gap: 12px;">
+                            <div class="meta-cell">
+                                <span class="meta-label">SUSTRATO:</span>
+                                <span class="meta-value" style="font-size: 0.8rem;">d-dimensional (1D, 2D, d_f)</span>
+                            </div>
+                            <div class="meta-cell">
+                                <span class="meta-label">SISTEMA:</span>
+                                <span class="meta-value" style="font-size: 0.8rem;">Gas ideal clásico diluido</span>
+                            </div>
+                            <div class="meta-cell">
+                                <span class="meta-label">AUTOR:</span>
+                                <span class="meta-value" style="font-size: 0.8rem;">Física Estadística</span>
+                            </div>
                         </div>
-                        <div class="meta-cell">
-                            <span class="meta-label">SISTEMA:</span>
-                            <span class="meta-value">Gas ideal clásico diluido</span>
-                        </div>
-                        <div class="meta-cell">
-                            <span class="meta-label">AUTOR:</span>
-                            <span class="meta-value">Física Estadística</span>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary" onclick="nextSlide()">INICIAR EJECUCIÓN</button>
                         </div>
                     </div>
-                    <div class="hero-actions">
-                        <button class="btn btn-primary" onclick="nextSlide()">INICIAR EJECUCIÓN</button>
+                </div>
+                <div class="visual-column">
+                    <div class="technical-panel widget-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; height: 100%; width: 100%; max-width: 420px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);">
+                        <div class="panel-header" style="width: 100%; text-align: center; margin-bottom: 20px;">
+                            ACCESO A LA PRESENTACIÓN
+                        </div>
+                        <div class="qr-card">
+                            <img src="qr-code.svg" alt="Código QR de la Presentación" class="qr-image" />
+                        </div>
+                        <div class="tech-mono" style="font-size: 0.72rem; color: var(--text-dim); margin-top: 20px; text-align: center; line-height: 1.4;">
+                            <span class="orange-text">[ ESCANEAR QR ]</span> para ver online<br>
+                            <span style="font-size: 0.65rem; color: var(--text-muted); word-break: break-all; display: block; margin-top: 4px;">https://paulthephysicist.github.io/presentacion-mecanica-estadistica/</span>
+                        </div>
                     </div>
                 </div>
             </div>

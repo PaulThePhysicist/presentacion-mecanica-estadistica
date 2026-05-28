@@ -457,6 +457,30 @@ p.highlight {
     border-color: var(--border-color);
 }
 
+.qr-card {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(255, 85, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+    border: 1px solid rgba(255, 85, 0, 0.2);
+}
+
+.qr-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 16px 36px rgba(255, 85, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.8);
+    border-color: var(--accent-orange);
+}
+
+.qr-image {
+    width: 250px;
+    height: 250px;
+    display: block;
+}
+
 /* Slide 2: Molecule Viewer */
 .molecule-viewer-container {
     width: 100%;
